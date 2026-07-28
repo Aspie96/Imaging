@@ -1,0 +1,7 @@
+name "imaging"
+description "A library for representing and managing basic raster RGBA images in D as rectangular arrays of pixels. It is written in pure D with no external dependencies (other than the standard library)."
+authors "Valentino Giudice"
+copyright "Copyright (C) 2026 Valentino Giudice"
+license "BSL-1.0"
+buildOptions "debugInfoC" platform="windows"
+targetType "library"

@@ -1,0 +1,25 @@
+name "examples"
+description "Exaples for the Imaging library."
+authors "Valentino Giudice"
+copyright "Copyright (C) 2026 Valentino Giudice"
+license "BSL-1.0"
+targetName "example"
+targetType "executable"
+
+dependency "imaging" path=".."
+
+configuration "generated" {
+    mainSourceFile "generated.d"
+}
+
+configuration "files" {
+    mainSourceFile "files.d"
+}
+
+configuration "display" {
+    sourceFiles "display.d" "window.c"
+    excludedSourceFiles "window.c" platform="windows"
+    sourceFiles "window.obj" platform="windows"
+    lflags "-lm" "-lX11" "-DX11" platform="linux"
+    libs "gdi32" "user32" platform="windows"
+}

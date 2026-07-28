@@ -1,0 +1,11 @@
+*.exe
+*.ilk
+*.lib
+*.o
+*.obj
+*.pdb
+/docs.json
+/.dub
+/docs
+/examples/images
+/examples/*.bmp

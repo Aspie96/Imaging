@@ -1,0 +1,13 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"cwd": "${workspaceFolder}/examples",
+			"name": "Build & Debug example",
+			"preLaunchTask": "Build example",
+			"program": "example",
+			"request": "launch",
+			"type": "code-d",
+		}
+	]
+}

@@ -1,0 +1,23 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"archType": "$current",
+			"buildType": "$current",
+			"compiler": "$current",
+			"configuration": "${input:config}",
+			"label": "Build example",
+			"root": "${workspaceFolder}/examples",
+			"run": false,
+			"type": "dub"
+		}
+	],
+	"inputs": [
+		{
+			"description": "Example to build",
+			"id": "config",
+			"options": ["display", "files", "generated"],
+			"type": "pickString"
+		}
+	]
+}
