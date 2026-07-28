@@ -2,6 +2,8 @@
 
 ![A generated image.](./img/generated1.bmp) ![Another generated image.](./img/generated2.bmp)
 
+[GitHub](https://github.com/Aspie96/Imaging) - [DUB](https://code.dlang.org/packages/imaging) - [Handmade Network](https://handmade.network/p/875/imaging/)
+
 This is a library for representing and managing basic raster RGBA images in [D](https://dlang.org/) as rectangular arrays of pixels. It is written in pure D with no external dependencies (other than the standard library).
 
 The goal of this library is to provide a simple, yet versatile, shared representation for, effectively, the most common kind of image in computing, so other libraries may leech upon it, building compatibility and making it a *lingua franca* for images in D, ideal for writing ***glue code***, including with other languages. It aims at supporting other libraries, not replacing them.
@@ -56,7 +58,7 @@ The project should aim at reaching a level of quality sufficient for inclusion i
 
 Contributions that improve the library and are consistent with this section are welcome!
 
-Development of Imaging happens on its GitHub repository. Communications happens in English and development should follow [GitHub flow](https://docs.github.com/en/get-started/using-github/github-flow).
+Development of Imaging happens on its GitHub [repository](https://github.com/Aspie96/Imaging). Communications happens in English and development should follow [GitHub flow](https://docs.github.com/en/get-started/using-github/github-flow).
 
 This project conforms to the [D Style](https://dlang.org/dstyle.html) conventions, as well as the [additional requirements for Phobos](https://dlang.org/dstyle.html#phobos).
 
