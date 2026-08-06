@@ -31,8 +31,7 @@ Bitmap[] readMultipleImages(string fname)
     {
         Bitmap img = loader.nextImage();
         assert(loader.state == LoadState.BeforeInfo || loader.state == LoadState.End);
-        images.length++;
-        images[$ - 1] = img;
+        images ~= img;
     }
     while (loader.state != LoadState.End);
     assert(!fp.eof && fp.tell == fp.size);

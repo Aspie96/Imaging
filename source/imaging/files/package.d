@@ -44,7 +44,7 @@ import std.typecons : Nullable;
     return val;
 }
 
-@nogc @safe package pure T leConv(T)(T val)
+@nogc @safe package(imaging.files) pure T leConv(T)(T val)
 {
     version (BigEndian)
     {
@@ -60,7 +60,7 @@ import std.typecons : Nullable;
     }
 }
 
-@nogc @safe package pure T beConv(T)(T val)
+@nogc @safe package(imaging.files) pure T beConv(T)(T val)
 {
     version (BigEndian)
     {

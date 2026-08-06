@@ -45,7 +45,7 @@ private struct ChunkHeader
     ChunkType type;
 }
 
-package enum ColorType : ubyte
+package(imaging.files) enum ColorType : ubyte
 {
     Grayscale = 0,
     RgbTriple = 2,
@@ -82,7 +82,7 @@ private ubyte paethPredictor(ubyte a, ubyte b, ubyte c)
     return c;
 }
 
-package struct Data_IHDR
+package(imaging.files) struct Data_IHDR
 {
 align(1):
     uint width;
@@ -144,13 +144,13 @@ align(1):
     }
 }
 
-package struct Data_acTL
+package(imaging.files) struct Data_acTL
 {
     uint numFrames;
     uint numPlays;
 }
 
-package struct Data_fcTL
+package(imaging.files) struct Data_fcTL
 {
 align(1):
     uint sequenceNumber;
@@ -164,14 +164,14 @@ align(1):
     ubyte blendOp;
 }
 
-package enum DisposeOp : ubyte
+package(imaging.files) enum DisposeOp : ubyte
 {
     APNG_DISPOSE_OP_NONE,
     APNG_DISPOSE_OP_BACKGROUND,
     APNG_DISPOSE_OP_PREVIOUS
 }
 
-package enum BlendOp : ubyte
+package(imaging.files) enum BlendOp : ubyte
 {
     APNG_BLEND_OP_SOURCE,
     APNG_BLEND_OP_OVER
@@ -272,7 +272,7 @@ public bool checkAnimated(File fp, bool afterSignature, int maxChunks = 1024)
     return false;
 }
 
-package struct BasePngLoader(bool Animated)
+package(imaging.files) struct BasePngLoader(bool Animated)
 {
     private File _fp;
     private ImageFormat _format;
@@ -350,7 +350,7 @@ package struct BasePngLoader(bool Animated)
         }
     }
 
-    package this(File fp, ImageFormat format, int maxChunks = 1024)
+    package(imaging.files) this(File fp, ImageFormat format, int maxChunks = 1024)
     {
         this._fp = fp;
         this._format = format;
@@ -371,12 +371,12 @@ package struct BasePngLoader(bool Animated)
         }
     }
 
-    package LoadState state() const
+    package(imaging.files) LoadState state() const
     {
         return this._state;
     }
 
-    package int length() const
+    package(imaging.files) int length() const
     {
         static if (Animated)
         {
@@ -390,17 +390,17 @@ package struct BasePngLoader(bool Animated)
 
     static if (Animated)
     {
-        @property package int width() const
+        @property package(imaging.files) int width() const
         {
             return this._info.width;
         }
 
-        @property package int height() const
+        @property package(imaging.files) int height() const
         {
             return this._info.height;
         }
 
-        @property package double duration() const
+        @property package(imaging.files) double duration() const
         {
             if (this._animated)
             {
@@ -410,7 +410,7 @@ package struct BasePngLoader(bool Animated)
         }
     }
 
-    package Nullable!ImageInfo nextInfo()
+    package(imaging.files) Nullable!ImageInfo nextInfo()
     in (this.state == LoadState.BeforeInfo || this.state == LoadState.BeforeImage)
     {
         static if (Animated)
@@ -1027,7 +1027,7 @@ package struct BasePngLoader(bool Animated)
         return true;
     }
 
-    package Bitmap nextImage()
+    package(imaging.files) Bitmap nextImage()
     in (this.state == LoadState.BeforeImage || this.state == LoadState.BeforeInfo)
     {
         if (this.state == LoadState.BeforeInfo)
@@ -1413,7 +1413,7 @@ package struct BasePngLoader(bool Animated)
         return bmp;
     }
 
-    package void skipImage()
+    package(imaging.files) void skipImage()
     in (this.state == LoadState.BeforeImage || this.state == LoadState.BeforeInfo)
     {
         bool animated;
@@ -1556,7 +1556,7 @@ public final class PngLoader : ImageLoader
     }
 }
 
-package void writeChunk(T)(File fp, ChunkType type, T data)
+package(imaging.files) void writeChunk(T)(File fp, ChunkType type, T data)
 {
     static if (is(T : E[], E))
     {
@@ -1589,7 +1589,7 @@ package void writeChunk(T)(File fp, ChunkType type, T data)
     fp.rawWrite([crc]);
 }
 
-package ubyte[] encode(const Bitmap bmp, ColorType colorType, int bitDepth)
+package(imaging.files) ubyte[] encode(const Bitmap bmp, ColorType colorType, int bitDepth)
 {
     PixelFormat format;
     immutable(Color)[] palette = null;

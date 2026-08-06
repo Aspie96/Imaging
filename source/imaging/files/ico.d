@@ -488,7 +488,7 @@ public final class IcoLoader : ImageLoader
         }
         bool allAndZero = all!(v => v == 0)(icAND);
         void[] data;
-        PixelFormat pixelFormat = PixelFormat.Format8bppIndexed;
+        PixelFormat pixelFormat;
         if (allAndZero || icHeader.biBitCount == 32)
         {
             data = null;
@@ -636,8 +636,7 @@ public final class IcoLoader : ImageLoader
                     if (palette.length <= 255)
                     {
                         transparentIndex = palette.length;
-                        palette.length++;
-                        palette[$ - 1] = Color(0, 0, 0, 0);
+                        palette ~= [Color(0, 0, 0, 0)];
                     }
                     else
                     {

@@ -61,7 +61,7 @@ else
         uint bfOffBits;
     }
 
-    package struct BITMAPINFOHEADER
+    package(imaging.files) struct BITMAPINFOHEADER
     {
         uint biSize;
         int biWidth;

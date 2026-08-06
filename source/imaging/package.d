@@ -667,7 +667,7 @@ public interface Image(T)
     return val1;
 }
 
-@nogc private static void copyBitsBuffer(ubyte* dest, size_t destOffset,
+@nogc private void copyBitsBuffer(ubyte* dest, size_t destOffset,
         const(ubyte)* src, size_t srcOffset, size_t length) nothrow
 {
     if (length == 0)
@@ -753,7 +753,7 @@ public interface Image(T)
     }
 }
 
-private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits = null)
+private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits = null)
 {
     buffer += offset / 8;
     offset %= 8;
@@ -781,7 +781,7 @@ private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[]
     }
 }
 
-@nogc private static void fillBitsBuffer(ubyte* buffer, size_t offset, size_t length, bool value) nothrow
+@nogc private void fillBitsBuffer(ubyte* buffer, size_t offset, size_t length, bool value) nothrow
 {
     if (length == 0)
     {
@@ -829,7 +829,7 @@ private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[]
 // If possible, computes an arithmetically correct ((skipX + width) * pixelFormat.bpp + 7) / 8.
 // Using that expression alone may produce incorrect results due to intermediate values exceding the maximum of their type.
 // If the final result does not fit in a size_t value, 0 is returned.
-@nogc @safe package pure size_t minStride(size_t skipX, int width, int bpp) nothrow
+@nogc @safe package(imaging) pure size_t minStride(size_t skipX, int width, int bpp) nothrow
 {
     if (bpp < 8)
     {
@@ -982,7 +982,7 @@ private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[]
      *         The array must be aligned to the alignment size of the pixel format.
      *         Its length must be the product between `stride` and `height`.
      */
-    @trusted public this(int width, int height, size_t skipX, size_t stride,
+    @nogc @trusted public this(int width, int height, size_t skipX, size_t stride,
             PixelFormat pixelFormat, immutable Color[] palette, bool bottomUp, inout void[] data) inout nothrow
     in
     {
@@ -2599,7 +2599,7 @@ private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[]
             private size_t _x1;
             private const(ubyte)* _ptr;
 
-            private @nogc @trusted this(const Bitmap self, int y)
+            @nogc @trusted private this(const Bitmap self, int y)
             in
             {
                 assert(self !is null);
