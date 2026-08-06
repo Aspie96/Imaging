@@ -574,7 +574,7 @@ public abstract class MultiImageFormat : ImageFormat
 
     @safe private static MultiImageFormat defaultFormat(const ubyte[] head) nothrow
     {
-        if (head[0 .. 4] == [0, 0, 1, 0])
+        if (head[0 .. 4] == [0, 0, 1, 0] || head[0 .. 4] == [0, 0, 2, 0])
         {
             return IcoFormat.instance();
         }

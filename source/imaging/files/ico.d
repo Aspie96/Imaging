@@ -80,6 +80,41 @@ private struct ICONDIRENTRY
     }
 }
 
+private struct CURSORDIRENTRY
+{
+    ubyte bWidth;
+    ubyte bHeight;
+    ubyte bColorCount;
+    ubyte bReserved;
+    ushort xHotspot;
+    ushort yHotspot;
+    uint dwBytesInRes;
+    uint dwImageOffset;
+
+    bool valid()
+    {
+        if (this.bReserved != 0)
+        {
+            return false;
+        }
+        int width = this.bWidth > 0 ? this.bWidth : 256;
+        int height = this.bHeight > 0 ? this.bHeight : 256;
+        if (this.xHotspot > width)
+        {
+            return false;
+        }
+        if (this.yHotspot > height)
+        {
+            return false;
+        }
+        if (!among!(0, 2, 16)(this.bColorCount))
+        {
+            return false;
+        }
+        return true;
+    }
+}
+
 private size_t bitShift(int bpp, size_t x)
 {
     return 8 - (1 + (x % (8 / bpp))) * bpp;
@@ -91,20 +126,22 @@ private size_t computeStride(int width, int bpp)
 }
 
 /**
- * Represents an image loader for a file in the Icon Format.
+ * Represents an image loader for a file in the Icon Format or the Cursor Format.
  */
 public final class IcoLoader : ImageLoader
 {
     private File _fp;
     private LoadState _state;
     private bool _isCursor;
-    private ICONDIRENTRY[] _idEntries;
+    private ICONDIRENTRY[] _iconEntries;
+    private CURSORDIRENTRY[] _curEntries;
+    private ushort _length;
     private ushort _index;
     private uint _offset;
     private Bitmap _bmp;
 
     /**
-     * Creates an image loader for a file in the Icon Format.
+     * Creates an image loader for a file in the Icon Format or the Cursor Format.
      * Calling this constructor performs read operations and advances the file pointer.
      *
      * Params:
@@ -126,7 +163,7 @@ public final class IcoLoader : ImageLoader
         {
             return;
         }
-        if (idHeader.idType != 1 && idHeader.idType == 2)
+        if (idHeader.idType != 1 && idHeader.idType != 2)
         {
             return;
         }
@@ -135,22 +172,41 @@ public final class IcoLoader : ImageLoader
             return;
         }
         this._isCursor = idHeader.idType == 2;
-        this._idEntries = new ICONDIRENTRY[idHeader.idCount];
-        if (fp.rawRead(this._idEntries).length != idHeader.idCount)
+        this._length = idHeader.idCount;
+        if (this._isCursor)
         {
-            return;
-        }
-        for (int i = 0; i < this._idEntries.length; i++)
-        {
-            this._idEntries[i] = leConv(this._idEntries[i]);
-            if (!this._idEntries[i].valid)
+            this._curEntries = new CURSORDIRENTRY[this._length];
+            if (fp.rawRead(this._curEntries).length != this._length)
             {
                 return;
             }
+            for (int i = 0; i < this._curEntries.length; i++)
+            {
+                this._curEntries[i] = leConv(this._curEntries[i]);
+                if (!this._curEntries[i].valid)
+                {
+                    return;
+                }
+            }
+        }
+        else
+        {
+            this._iconEntries = new ICONDIRENTRY[this._length];
+            if (fp.rawRead(this._iconEntries).length != this._length)
+            {
+                return;
+            }
+            for (int i = 0; i < this._iconEntries.length; i++)
+            {
+                this._iconEntries[i] = leConv(this._iconEntries[i]);
+                if (!this._iconEntries[i].valid)
+                {
+                    return;
+                }
+            }
         }
         this._index = 0;
-        this._offset = cast(uint)(ICONDIRHEADER.sizeof + ICONDIRENTRY.sizeof
-                * this._idEntries.length);
+        this._offset = cast(uint)(ICONDIRHEADER.sizeof + ICONDIRENTRY.sizeof * this._length);
         this._state = LoadState.BeforeInfo;
     }
 
@@ -170,7 +226,7 @@ public final class IcoLoader : ImageLoader
     @nogc @property @safe public int length() const nothrow
     in (this.state != LoadState.Invalid)
     {
-        return cast(int) this._idEntries.length;
+        return this._length;
     }
 
     private static int maxIndex(int width, int height, size_t dStride, int bpp, ubyte[] data)
@@ -213,20 +269,45 @@ public final class IcoLoader : ImageLoader
     {
         this._state = LoadState.Invalid;
         this._bmp = null;
-        ICONDIRENTRY entry = this._idEntries[this._index];
-        if (entry.dwImageOffset < this._offset)
+        uint dwImageOffset;
+        ubyte bWidth;
+        ubyte bHeight;
+        uint dwBytesInRes;
+        ushort wBitCount;
+        ubyte bColorCount;
+        if (this._isCursor)
+        {
+            CURSORDIRENTRY entry = this._curEntries[this._index];
+            dwImageOffset = entry.dwImageOffset;
+            bWidth = entry.bWidth;
+            bHeight = entry.bHeight;
+            dwBytesInRes = entry.dwBytesInRes;
+            wBitCount = 0;
+            bColorCount = entry.bColorCount;
+        }
+        else
+        {
+            ICONDIRENTRY entry = this._iconEntries[this._index];
+            dwImageOffset = entry.dwImageOffset;
+            bWidth = entry.bWidth;
+            bHeight = entry.bHeight;
+            dwBytesInRes = entry.dwBytesInRes;
+            wBitCount = entry.wBitCount;
+            bColorCount = entry.bColorCount;
+        }
+        if (dwImageOffset < this._offset)
         {
             return Nullable!ImageInfo();
         }
-        uint offset = entry.dwImageOffset - this._offset;
+        uint offset = dwImageOffset - this._offset;
         ulong p = this._fp.tell;
         this._fp.seek(offset, SEEK_CUR);
         if (this._fp.tell - p != offset)
         {
             return Nullable!ImageInfo();
         }
-        int width = entry.bWidth > 0 ? entry.bWidth : 256;
-        int height = entry.bHeight > 0 ? entry.bHeight : 256;
+        int width = bWidth > 0 ? bWidth : 256;
+        int height = bHeight > 0 ? bHeight : 256;
         ubyte[8] head;
         if (this._fp.rawRead(head[]).length != 8)
         {
@@ -235,7 +316,7 @@ public final class IcoLoader : ImageLoader
         this._fp.seek(-8, SEEK_CUR);
         if (head == pngSignature)
         {
-            if (entry.wBitCount != 0 && entry.wBitCount != 32)
+            if (wBitCount != 0 && wBitCount != 32)
             {
                 return Nullable!ImageInfo();
             }
@@ -259,7 +340,7 @@ public final class IcoLoader : ImageLoader
             assert(this._bmp !is null);
             ulong shift = this._fp.tell - p;
             assert(shift > 0);
-            if (entry.dwBytesInRes != 0 && shift != entry.dwBytesInRes)
+            if (dwBytesInRes != 0 && shift != dwBytesInRes)
             {
                 return Nullable!ImageInfo();
             }
@@ -269,15 +350,7 @@ public final class IcoLoader : ImageLoader
                     pngInfo.get.pixelFormat);
             return nullable(info);
         }
-        if (entry.wBitCount == 0)
-        {
-            return Nullable!ImageInfo();
-        }
-        int paletteSize = entry.wBitCount <= 8 ? (1 << entry.wBitCount) : 0;
-        size_t fStride1 = computeStride(width, entry.wBitCount);
-        size_t fStride2 = computeStride(width, 1);
-        if (entry.dwBytesInRes != (BITMAPINFOHEADER.sizeof + RGBQUAD.sizeof * paletteSize + (
-                fStride1 + fStride2) * height))
+        if (!this._isCursor && wBitCount == 0)
         {
             return Nullable!ImageInfo();
         }
@@ -304,15 +377,29 @@ public final class IcoLoader : ImageLoader
         {
             return Nullable!ImageInfo();
         }
-        if (icHeader.biBitCount != entry.wBitCount)
+        if (!among!(1, 2, 4, 8, 16, 24, 32)(icHeader.biBitCount))
         {
             return Nullable!ImageInfo();
         }
-        if (icHeader.biCompression != 0 && !(icHeader.biCompression == 3 && entry.wBitCount == 16))
+        if (!this._isCursor && icHeader.biBitCount != wBitCount)
         {
             return Nullable!ImageInfo();
         }
-        if (icHeader.biSizeImage != 0 && icHeader.biSizeImage != (fStride1 + fStride2) * height)
+        int paletteSize = icHeader.biBitCount <= 8 ? (1 << icHeader.biBitCount) : 0;
+        size_t fStride1 = computeStride(width, icHeader.biBitCount);
+        size_t fStride2 = computeStride(width, 1);
+        if (dwBytesInRes != (BITMAPINFOHEADER.sizeof + RGBQUAD.sizeof * paletteSize + (
+                fStride1 + fStride2) * height))
+        {
+            return Nullable!ImageInfo();
+        }
+        if (icHeader.biCompression != 0 && !(icHeader.biCompression == 3 && icHeader.biBitCount
+                == 16))
+        {
+            return Nullable!ImageInfo();
+        }
+        if (icHeader.biSizeImage != 0 && icHeader.biSizeImage != (fStride1 + fStride2) * height
+                && icHeader.biSizeImage != fStride1 * height)
         {
             return Nullable!ImageInfo();
         }
@@ -376,7 +463,7 @@ public final class IcoLoader : ImageLoader
         }
         else
         {
-            int maxI = maxIndex(width, height, fStride1, entry.wBitCount, icXOR);
+            int maxI = maxIndex(width, height, fStride1, icHeader.biBitCount, icXOR);
             palette = new Color[maxI + 1];
             for (int i = 0; i < palette.length; i++)
             {
@@ -401,11 +488,11 @@ public final class IcoLoader : ImageLoader
         }
         bool allAndZero = all!(v => v == 0)(icAND);
         void[] data;
-        PixelFormat pixelFormat;
-        if (allAndZero || entry.wBitCount == 32)
+        PixelFormat pixelFormat = PixelFormat.Format8bppIndexed;
+        if (allAndZero || icHeader.biBitCount == 32)
         {
             data = null;
-            final switch (entry.wBitCount)
+            final switch (icHeader.biBitCount)
             {
             case 1:
                 pixelFormat = PixelFormat.Format1bppIndexed;
@@ -487,7 +574,7 @@ public final class IcoLoader : ImageLoader
                 break;
             }
         }
-        else if (entry.wBitCount <= 8)
+        else if (icHeader.biBitCount <= 8)
         {
             bool[] allOpaque = new bool[palette.length];
             allOpaque[] = true;
@@ -497,9 +584,9 @@ public final class IcoLoader : ImageLoader
             {
                 for (int x = 0; x < width; x++)
                 {
-                    ubyte index = icXOR[fStride1 * y + x * entry.wBitCount / 8];
-                    index >>= bitShift(entry.wBitCount, x);
-                    index &= 0xFF >> (8 - entry.wBitCount);
+                    ubyte index = icXOR[fStride1 * y + x * icHeader.biBitCount / 8];
+                    index >>= bitShift(icHeader.biBitCount, x);
+                    index &= 0xFF >> (8 - icHeader.biBitCount);
                     bool transparent = icAND[fStride2 * y + x / 8] >> (7 - x % 8) & 1;
                     if (transparent)
                     {
@@ -523,7 +610,7 @@ public final class IcoLoader : ImageLoader
             if (all!(i => allOpaque[i] || allTransparent[i])(iota(palette.length)))
             {
                 createData = false;
-                final switch (entry.wBitCount)
+                final switch (icHeader.biBitCount)
                 {
                 case 1:
                     pixelFormat = pixelFormat.Format1bppIndexed;
@@ -551,18 +638,6 @@ public final class IcoLoader : ImageLoader
                         transparentIndex = palette.length;
                         palette.length++;
                         palette[$ - 1] = Color(0, 0, 0, 0);
-                        if (palette.length <= 2)
-                        {
-                            pixelFormat = PixelFormat.Format1bppIndexed;
-                        }
-                        else if (palette.length <= 16)
-                        {
-                            pixelFormat = PixelFormat.Format4bppIndexed;
-                        }
-                        else
-                        {
-                            pixelFormat = PixelFormat.Format8bppIndexed;
-                        }
                     }
                     else
                     {
@@ -573,9 +648,9 @@ public final class IcoLoader : ImageLoader
                         {
                             for (int x = 0; x < width; x++)
                             {
-                                ubyte index = icXOR[fStride1 * y + x * entry.wBitCount / 8];
-                                index >>= bitShift(entry.wBitCount, x);
-                                index &= 0xFF >> (8 - entry.wBitCount);
+                                ubyte index = icXOR[fStride1 * y + x * icHeader.biBitCount / 8];
+                                index >>= bitShift(icHeader.biBitCount, x);
+                                index &= 0xFF >> (8 - icHeader.biBitCount);
                                 bool transparent = icAND[fStride2 * y + x / 8] >> (7 - x % 8) & 1;
                                 Color color = palette[index];
                                 if (transparent)
@@ -589,6 +664,21 @@ public final class IcoLoader : ImageLoader
                         }
                     }
                 }
+                if (palette.length > 0)
+                {
+                    if (palette.length <= 2)
+                    {
+                        pixelFormat = PixelFormat.Format1bppIndexed;
+                    }
+                    else if (palette.length <= 16)
+                    {
+                        pixelFormat = PixelFormat.Format4bppIndexed;
+                    }
+                    else
+                    {
+                        pixelFormat = PixelFormat.Format8bppIndexed;
+                    }
+                }
             }
             if (createData)
             {
@@ -599,9 +689,9 @@ public final class IcoLoader : ImageLoader
                 {
                     for (int x = 0; x < width; x++)
                     {
-                        ubyte index = icXOR[fStride1 * y + x * entry.wBitCount / 8];
-                        index >>= bitShift(entry.wBitCount, x);
-                        index &= 0xFF >> (8 - entry.wBitCount);
+                        ubyte index = icXOR[fStride1 * y + x * icHeader.biBitCount / 8];
+                        index >>= bitShift(icHeader.biBitCount, x);
+                        index &= 0xFF >> (8 - icHeader.biBitCount);
                         bool transparent = icAND[fStride2 * y + x / 8] >> (7 - x % 8) & 1;
                         if (transparent && !allTransparent[index])
                         {
@@ -613,7 +703,7 @@ public final class IcoLoader : ImageLoader
                 }
             }
         }
-        else if (entry.bColorCount == 16)
+        else if (bColorCount == 16)
         {
             pixelFormat = PixelFormat.Format32bppArgbLE;
             data = new uint[width * height];
@@ -652,7 +742,7 @@ public final class IcoLoader : ImageLoader
         }
         else
         {
-            assert(entry.wBitCount == 24);
+            assert(icHeader.biBitCount == 24);
             pixelFormat = PixelFormat.Format32bppArgbLE;
             data = new uint[width * height];
             for (int y = 0; y < height; y++)
@@ -749,7 +839,7 @@ public final class IcoLoader : ImageLoader
         }
         assert(this.state == LoadState.BeforeImage);
         this._index++;
-        if (this._index == this._idEntries.length)
+        if (this._index == this.length)
         {
             this._state = LoadState.End;
         }
@@ -798,18 +888,19 @@ public final class IcoFormat : MultiImageFormat
     }
 
     /**
-     * Checks whether a file is in the Icon Format, based on its first bytes.
+     * Checks whether a file is is either the Icon Format or the Cursor Format, based on its first bytes.
      *
      * Params:
      *     head = The beginning of the file.
      *
      * Returns:
-     *     `true` if the file is in Icon Format, `false` otherwise.
+     *     `true` if the file is in the Icon Format or the Cursor Format, `false` otherwise.
      *     If not enough bytes are provided, `false` is returned.
      */
     public override bool checkFormat(const ubyte[] head) const
     {
-        return head[0 .. 4] == [0, 0, 1, 0];
+        ubyte[4] bytes = head[0 .. 4];
+        return bytes == [0, 0, 1, 0] || bytes == [0, 0, 2, 0];
     }
 
     /**
