@@ -175,7 +175,7 @@ public enum PixelFormat
     }
 }
 
-unittest
+pure nothrow @nogc @safe unittest
 {
     assert(PixelFormat.Format1bppIndexed.indexed);
     assert(PixelFormat.Format4bppIndexed.indexed);
@@ -219,7 +219,7 @@ unittest
     }
 }
 
-unittest
+pure nothrow @nogc @safe unittest
 {
     assert(PixelFormat.Format1bppIndexed.bpp == 1);
     assert(PixelFormat.Format4bppIndexed.bpp == 4);
@@ -257,7 +257,7 @@ unittest
     }
 }
 
-unittest
+pure nothrow @nogc @safe unittest
 {
     assert(PixelFormat.Format1bppIndexed.alignSize == 1);
     assert(PixelFormat.Format4bppIndexed.alignSize == 1);
@@ -302,7 +302,7 @@ unittest
     return cast(PixelFormat)(pixelFormat - 1);
 }
 
-unittest
+pure nothrow @nogc @safe unittest
 {
     assert(flipEndian(PixelFormat.Format1bppIndexed) == PixelFormat.Format1bppIndexed);
     assert(flipEndian(PixelFormat.Format4bppIndexed) == PixelFormat.Format4bppIndexed);
@@ -386,7 +386,7 @@ unittest
         this.rgba = rgba;
     }
 
-    unittest
+    pure nothrow @nogc unittest
     {
         Color c = Color(0xBA595EFF);
         assert(c.r == 0xBA);
@@ -412,7 +412,7 @@ unittest
         this.a = a;
     }
 
-    unittest
+    pure nothrow @nogc unittest
     {
         Color c = Color(0xBA, 0x59, 0x5E, 0xFF);
         assert(c.rgba == 0xBA595EFF);
@@ -431,7 +431,7 @@ unittest
         this(r, g, b, 0xFF);
     }
 
-    unittest
+    pure nothrow @nogc unittest
     {
         Color c = Color(0xBA, 0x59, 0x5E);
         assert(c.rgba == 0xBA595EFF);
@@ -479,7 +479,7 @@ unittest
         return Color(luma, luma, luma);
     }
 
-    unittest
+    pure nothrow @nogc unittest
     {
         Color c = Color.gray(0xBA);
         assert(c.r == 0xBA);
@@ -500,7 +500,7 @@ unittest
         return ((this.r * 299 + this.g * 587 + this.b * 114) + 500) / 1000;
     }
 
-    unittest
+    pure nothrow @nogc unittest
     {
         Color c = Color.gray(0xBA);
         assert(c.luma == 0xBA);
@@ -564,7 +564,7 @@ unittest
         return sqrt(cast(float) squared);
     }
 
-    unittest
+    pure nothrow @nogc unittest
     {
         assert(Color.red.dist(Color.d) == Color.d.dist(Color.red));
         assert(Color(0x00, 0x00, 0x00, 0x00).dist(Color(0xFF, 0xFF, 0xFF, 0x00)) == 0);
@@ -612,7 +612,7 @@ static assert(Color.alignof == int.alignof);
     return Color(rr, rg, rb, ra);
 }
 
-unittest
+pure nothrow @nogc @safe unittest
 {
     assert(blend(Color.red, Color.blue) == Color.blue);
     assert(blend(Color.blue, Color.red) == Color.red);
@@ -683,7 +683,7 @@ in (0 <= factor && factor <= 1)
     return Color(rr, rg, rb, ra);
 }
 
-unittest
+pure nothrow @nogc @safe unittest
 {
     Color c1 = mix(Color.red, Color.green);
     float dist = Color.red.dist(Color.green);
@@ -1102,7 +1102,7 @@ private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[]
         this._pixelFormat = pixelFormat;
     }
 
-    unittest
+    nothrow unittest
     {
         PixelFormat[] testFormats = [
             PixelFormat.Format1bppIndexed, PixelFormat.Format16bppRgb555,
@@ -1985,7 +1985,7 @@ private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[]
         return true;
     }
 
-    unittest
+    nothrow unittest
     {
         ubyte[] data = [0, 1, 2, 0];
         Bitmap img = new Bitmap(2, 2, 0, 2, PixelFormat.Format8bppIndexed,
@@ -2749,7 +2749,7 @@ private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[]
                 this.skipX * this.bpp, this.width * this.bpp);
     }
 
-    @system unittest
+    @system nothrow unittest
     {
         Bitmap img = new Bitmap(32, 4, PixelFormat.Format1bppIndexed, [
             Color.black, Color.white
@@ -4097,7 +4097,7 @@ private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[]
         return this.bottomUp ? iota(this.height - 1, -1, -1) : iota(0, this.height, 1);
     }
 
-    unittest
+    nothrow unittest
     {
         import std.array : array;
 
@@ -4116,7 +4116,7 @@ private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[]
         return this.bottomUp ? iota(0, this.height, 1) : iota(this.height - 1, -1, -1);
     }
 
-    unittest
+    nothrow unittest
     {
         import std.array : array;
 
