@@ -175,6 +175,28 @@ public enum PixelFormat
     }
 }
 
+/// Value of [indexed] for each pixel format.
+/// Indexed formats are those with "Indexed" in their name.
+pure nothrow @nogc @safe unittest
+{
+    assert(PixelFormat.Format1bppIndexed.indexed);
+    assert(PixelFormat.Format4bppIndexed.indexed);
+    assert(PixelFormat.Format8bppIndexed.indexed);
+    assert(!PixelFormat.Format8bppGray.indexed);
+    assert(!PixelFormat.Format16bppRgb555BE.indexed);
+    assert(!PixelFormat.Format16bppRgb555LE.indexed);
+    assert(!PixelFormat.Format16bppRgb565BE.indexed);
+    assert(!PixelFormat.Format16bppRgb565LE.indexed);
+    assert(!PixelFormat.Format24bppRgbBE.indexed);
+    assert(!PixelFormat.Format24bppRgbLE.indexed);
+    assert(!PixelFormat.Format32bppXrgbBE.indexed);
+    assert(!PixelFormat.Format32bppXrgbLE.indexed);
+    assert(!PixelFormat.Format32bppArgbBE.indexed);
+    assert(!PixelFormat.Format32bppArgbLE.indexed);
+    assert(!PixelFormat.Format32bppRgbaBE.indexed);
+    assert(!PixelFormat.Format32bppRgbaLE.indexed);
+}
+
 /// The number of bits per pixel in the given pixel format.
 /// Always a divsior or multiple of 8.
 @nogc @safe public pure int bpp(PixelFormat pixelFormat) nothrow
@@ -199,6 +221,28 @@ public enum PixelFormat
     }
 }
 
+/// Value of [bpp] for each pixel format.
+/// The number of bits per pixel is in the name of each format.
+pure nothrow @nogc @safe unittest
+{
+    assert(PixelFormat.Format1bppIndexed.bpp == 1);
+    assert(PixelFormat.Format4bppIndexed.bpp == 4);
+    assert(PixelFormat.Format8bppIndexed.bpp == 8);
+    assert(PixelFormat.Format8bppGray.bpp == 8);
+    assert(PixelFormat.Format16bppRgb555BE.bpp == 16);
+    assert(PixelFormat.Format16bppRgb555LE.bpp == 16);
+    assert(PixelFormat.Format16bppRgb565BE.bpp == 16);
+    assert(PixelFormat.Format16bppRgb565LE.bpp == 16);
+    assert(PixelFormat.Format24bppRgbBE.bpp == 24);
+    assert(PixelFormat.Format24bppRgbLE.bpp == 24);
+    assert(PixelFormat.Format32bppXrgbBE.bpp == 32);
+    assert(PixelFormat.Format32bppXrgbLE.bpp == 32);
+    assert(PixelFormat.Format32bppArgbBE.bpp == 32);
+    assert(PixelFormat.Format32bppArgbLE.bpp == 32);
+    assert(PixelFormat.Format32bppRgbaBE.bpp == 32);
+    assert(PixelFormat.Format32bppRgbaLE.bpp == 32);
+}
+
 /// The alignment size for pixel data for the given format, in bytes.
 @nogc @safe public pure int alignSize(PixelFormat pixelFormat) nothrow
 {
@@ -215,6 +259,28 @@ public enum PixelFormat
     case 32:
         return uint.alignof;
     }
+}
+
+/// Value of [alignSize] for each pixel format.
+// The alignment size for each pixel fomat is the same as that of the integral type with the same size if any exists or 1 otherwise.
+pure nothrow @nogc @safe unittest
+{
+    assert(PixelFormat.Format1bppIndexed.alignSize == 1);
+    assert(PixelFormat.Format4bppIndexed.alignSize == 1);
+    assert(PixelFormat.Format8bppIndexed.alignSize == 1);
+    assert(PixelFormat.Format8bppGray.alignSize == 1);
+    assert(PixelFormat.Format16bppRgb555BE.alignSize == ushort.alignof);
+    assert(PixelFormat.Format16bppRgb555LE.alignSize == ushort.alignof);
+    assert(PixelFormat.Format16bppRgb565BE.alignSize == ushort.alignof);
+    assert(PixelFormat.Format16bppRgb565LE.alignSize == ushort.alignof);
+    assert(PixelFormat.Format24bppRgbBE.alignSize == 1);
+    assert(PixelFormat.Format24bppRgbLE.alignSize == 1);
+    assert(PixelFormat.Format32bppXrgbBE.alignSize == uint.alignof);
+    assert(PixelFormat.Format32bppXrgbLE.alignSize == uint.alignof);
+    assert(PixelFormat.Format32bppArgbBE.alignSize == uint.alignof);
+    assert(PixelFormat.Format32bppArgbLE.alignSize == uint.alignof);
+    assert(PixelFormat.Format32bppRgbaBE.alignSize == uint.alignof);
+    assert(PixelFormat.Format32bppRgbaLE.alignSize == uint.alignof);
 }
 
 /**
@@ -240,6 +306,28 @@ public enum PixelFormat
         return cast(PixelFormat)(pixelFormat + 1);
     }
     return cast(PixelFormat)(pixelFormat - 1);
+}
+
+/// Output of [flipEndian] for each pixel format.
+/// When a pixel format has no more than 8 bits per pixel swapping its endianness doesn't change it.
+pure nothrow @nogc @safe unittest
+{
+    assert(flipEndian(PixelFormat.Format1bppIndexed) == PixelFormat.Format1bppIndexed);
+    assert(flipEndian(PixelFormat.Format4bppIndexed) == PixelFormat.Format4bppIndexed);
+    assert(flipEndian(PixelFormat.Format8bppIndexed) == PixelFormat.Format8bppIndexed);
+    assert(flipEndian(PixelFormat.Format8bppGray) == PixelFormat.Format8bppGray);
+    assert(flipEndian(PixelFormat.Format16bppRgb555BE) == PixelFormat.Format16bppRgb555LE);
+    assert(flipEndian(PixelFormat.Format16bppRgb555LE) == PixelFormat.Format16bppRgb555BE);
+    assert(flipEndian(PixelFormat.Format16bppRgb565BE) == PixelFormat.Format16bppRgb565LE);
+    assert(flipEndian(PixelFormat.Format16bppRgb565LE) == PixelFormat.Format16bppRgb565BE);
+    assert(flipEndian(PixelFormat.Format24bppRgbBE) == PixelFormat.Format24bppRgbLE);
+    assert(flipEndian(PixelFormat.Format24bppRgbLE) == PixelFormat.Format24bppRgbBE);
+    assert(flipEndian(PixelFormat.Format32bppXrgbBE) == PixelFormat.Format32bppXrgbLE);
+    assert(flipEndian(PixelFormat.Format32bppXrgbLE) == PixelFormat.Format32bppXrgbBE);
+    assert(flipEndian(PixelFormat.Format32bppArgbBE) == PixelFormat.Format32bppArgbLE);
+    assert(flipEndian(PixelFormat.Format32bppArgbLE) == PixelFormat.Format32bppArgbBE);
+    assert(flipEndian(PixelFormat.Format32bppRgbaBE) == PixelFormat.Format32bppRgbaLE);
+    assert(flipEndian(PixelFormat.Format32bppRgbaLE) == PixelFormat.Format32bppRgbaBE);
 }
 
 /**
@@ -306,6 +394,16 @@ public enum PixelFormat
         this.rgba = rgba;
     }
 
+    /// Creating a [Color] instance from a value in hexadecimal form
+    pure nothrow @nogc unittest
+    {
+        Color c = Color(0xBA595EFF);
+        assert(c.r == 0xBA);
+        assert(c.g == 0x59);
+        assert(c.b == 0x5E);
+        assert(c.a == 0xFF);
+    }
+
     /**
      * Creates a [Color] object with the given red, green, blue and alpha values.
      *
@@ -315,7 +413,7 @@ public enum PixelFormat
      *     b = The blue component value for the color.
      *     a = The alpha component value for the color.
      */
-    @nogc public pure this(ubyte r, ubyte g, ubyte b, ubyte a) nothrow
+    @nogc public pure this(ubyte r, ubyte g, ubyte b, ubyte a = 0xFF) nothrow
     {
         this.r = r;
         this.g = g;
@@ -323,17 +421,14 @@ public enum PixelFormat
         this.a = a;
     }
 
-    /**
-     * Creates a [Color] object representing a fully opaque color with the given red, green and blue.
-     *
-     * Params:
-     *     r = The red component value for the color.
-     *     g = The green component value for the color.
-     *     b = The blue component value for the color.
-     */
-    @nogc public pure this(ubyte r, ubyte g, ubyte b) nothrow
+    /// Creating a [Color] instance from R, G, B and A values.
+    /// The alpha value defaults to the maximum, representing full opaqueness.
+    pure nothrow @nogc unittest
     {
-        this(r, g, b, 0xFF);
+        Color c = Color(0xBA, 0x59, 0x5E, 0xFF);
+        assert(c.rgba == 0xBA595EFF);
+        c = Color(0xBA, 0x59, 0x5E);
+        assert(c.rgba == 0xBA595EFF);
     }
 
     /// Fully opaque `#FF0000` color.
@@ -378,6 +473,20 @@ public enum PixelFormat
         return Color(luma, luma, luma);
     }
 
+    /// Representing a number of shades of gray
+    pure nothrow @nogc unittest
+    {
+        for (int i = 0; i < 50; i++)
+        {
+            ubyte l = cast(ubyte)((i + 1) * 2);
+            Color c = Color.gray(l);
+            assert(c.r == l);
+            assert(c.g == l);
+            assert(c.b == l);
+            assert(c.a == 0xFF);
+        }
+    }
+
     /**
      * Computes the luma of this color, which is a measure of its percieved brightness.
      *
@@ -388,6 +497,13 @@ public enum PixelFormat
     @nogc public pure ubyte luma() const nothrow
     {
         return ((this.r * 299 + this.g * 587 + this.b * 114) + 500) / 1000;
+    }
+
+    /// Getting the luma for a color
+    pure nothrow @nogc unittest
+    {
+        Color c = Color.gray(0xBA);
+        assert(c.luma == 0xBA);
     }
 
     // See: https://www.compuphase.com/cmetric.htm
@@ -447,6 +563,15 @@ public enum PixelFormat
         int squared = this.distSquared(other);
         return sqrt(cast(float) squared);
     }
+
+    /// Computing the difference between two colors.
+    /// It is symmmetric and 0 for two identical colors, as well as for any two full transparencies.
+    pure nothrow @nogc unittest
+    {
+        assert(Color.red.dist(Color.d) == Color.d.dist(Color.red));
+        assert(Color.red.dist(Color.red) == 0);
+        assert(Color(0x00, 0x00, 0x00, 0x00).dist(Color(0xFF, 0xFF, 0xFF, 0x00)) == 0);
+    }
 }
 
 static assert(Color.alignof == int.alignof);
@@ -472,11 +597,11 @@ static assert(Color.alignof == int.alignof);
     }
     float br = back.r / 255.0F;
     float bg = back.g / 255.0F;
-    float bb = back.g / 255.0F;
+    float bb = back.b / 255.0F;
     float ba = back.a / 255.0F;
     float fr = front.r / 255.0F;
     float fg = front.g / 255.0F;
-    float fb = front.g / 255.0F;
+    float fb = front.b / 255.0F;
     float fa = front.a / 255.0F;
     float recA = 1 - fa;
     float a = fa + ba * recA;
@@ -488,6 +613,17 @@ static assert(Color.alignof == int.alignof);
     ubyte rb = cast(ubyte)(b * 255 + 0.5F);
     ubyte ra = cast(ubyte)(a * 255 + 0.5F);
     return Color(rr, rg, rb, ra);
+}
+
+/// Alpha-blending colors
+pure nothrow @nogc @safe unittest
+{
+    assert(blend(Color.red, Color.blue) == Color.blue);
+    assert(blend(Color.blue, Color.red) == Color.red);
+    Color transparent = Color(0, 0, 0, 0);
+    assert(blend(Color.red, transparent) == Color.red);
+    assert(blend(transparent, Color.red) == Color.red);
+    assert(blend(Color(20, 20, 20, 10), Color(20, 20, 20, 10)) == Color(20, 20, 20, 20));
 }
 
 /**
@@ -537,9 +673,9 @@ in (0 <= factor && factor <= 1)
         f2 = a2 * factor;
     }
     float a = f1 + f2;
-    float r = pow(pow(r1, 2.2F) * f1 + pow(r2, 2.2F) * f2, 1 / 2.2F) / a;
-    float g = pow(pow(g1, 2.2F) * f1 + pow(g2, 2.2F) * f2, 1 / 2.2F) / a;
-    float b = pow(pow(b1, 2.2F) * f1 + pow(b2, 2.2F) * f2, 1 / 2.2F) / a;
+    float r = pow((pow(r1, 2.2F) * f1 + pow(r2, 2.2F) * f2) / a, 1 / 2.2F);
+    float g = pow((pow(g1, 2.2F) * f1 + pow(g2, 2.2F) * f2) / a, 1 / 2.2F);
+    float b = pow((pow(b1, 2.2F) * f1 + pow(b2, 2.2F) * f2) / a, 1 / 2.2F);
     if (color1.a == 0 && color2.a == 0)
     {
         a = 0;
@@ -549,6 +685,23 @@ in (0 <= factor && factor <= 1)
     ubyte rb = cast(ubyte)(b * 255 + 0.5F);
     ubyte ra = cast(ubyte)(a * 255 + 0.5F);
     return Color(rr, rg, rb, ra);
+}
+
+/// Mixing colors
+pure nothrow @nogc @safe unittest
+{
+    Color c1 = mix(Color.red, Color.green);
+    float dist = Color.red.dist(Color.green);
+    assert(Color.red.dist(c1) < dist);
+    assert(Color.green.dist(c1) < dist);
+    assert(mix(Color.red, Color.green, 0) == Color.red);
+    assert(mix(Color.red, Color.green, 1) == Color.green);
+    Color transparent1 = Color(0x00, 0x00, 0x00, 0x00);
+    Color c2 = mix(Color.red, transparent1);
+    assert(c2.r == 0xFF && c2.g == 0x00 && c2.b == 0x00);
+    Color transparent2 = Color(0xFF, 0xFF, 0xFF, 0x00);
+    Color transparent3 = mix(transparent1, transparent2);
+    assert(transparent3.a == 0);
 }
 
 /**
@@ -667,93 +820,98 @@ public interface Image(T)
     return val1;
 }
 
-@nogc private void copyBitsBuffer(ubyte* dest, size_t destOffset,
+@nogc private static void copyBitsBuffer(ubyte* dest, size_t destOffset,
         const(ubyte)* src, size_t srcOffset, size_t length) nothrow
 {
-    if (length == 0)
+    if (length != 0)
     {
-        return;
-    }
-    dest += destOffset / 8;
-    destOffset %= 8;
-    src += srcOffset / 8;
-    srcOffset %= 8;
-    if (length <= 8)
-    {
-        for (int i = 0; i < length; i++)
+        dest += destOffset / 8;
+        destOffset %= 8;
+        src += srcOffset / 8;
+        srcOffset %= 8;
+        if (length <= 8)
         {
-            ubyte val = cast(ubyte)(((src[(srcOffset + i) / 8] >> (7 - (srcOffset + i) % 8)) & 1) << (
-                    7 - (destOffset + i) % 8));
-            dest[(destOffset + i) / 8] = (dest[(destOffset + i) / 8] & ~(
-                    1 << (7 - (destOffset + i) % 8))) | val;
-        }
-    }
-    int bits = (length - 8 + destOffset) % 8;
-    size_t bytes = (length - 8 + destOffset) / 8;
-    if (srcOffset == destOffset)
-    {
-        int leftBits = srcOffset % 8;
-        size_t middleBytes = (length - leftBits) / 8;
-        int rightBits = (length - leftBits) % 8;
-        if (leftBits > 0)
-        {
-            ubyte val = src[0] & 0xFF >> (8 - leftBits);
-            dest[0] = dest[0] & 0xFF << leftBits | val;
-        }
-        if (middleBytes > 0)
-        {
-            dest[!!leftBits .. !!leftBits + middleBytes] = src[!!leftBits
-                .. !!leftBits + middleBytes];
-        }
-        if (rightBits > 0)
-        {
-            ubyte val = src[!!leftBits + middleBytes] & 0xFF << (8 - rightBits);
-            dest[!!leftBits + middleBytes] = dest[!!leftBits + middleBytes] & 0xFF >> rightBits
-                | val;
-        }
-    }
-    else if (srcOffset > destOffset)
-    {
-        size_t shift = srcOffset - destOffset;
-        dest[0] = (dest[0] & 0xFF << (8 - destOffset)) | (
-                0xFF >> destOffset & (src[0] << shift | src[1] >> (8 - shift)));
-        for (int i = 1; i <= bytes; i++)
-        {
-            dest[i] = cast(ubyte)(src[i] << shift | src[i + 1] >> (8 - shift));
-        }
-        if (bits > 0)
-        {
-            ubyte val = cast(ubyte)(src[bytes + 1] << shift);
-            if (bits > 8 - shift)
+            for (int i = 0; i < length; i++)
             {
-                val |= src[bytes + 2] >> (8 - shift);
+                ubyte val = cast(ubyte)(((src[(srcOffset + i) / 8] >> (7 - (srcOffset + i) % 8)) & 1) << (
+                        7 - (destOffset + i) % 8));
+                dest[(destOffset + i) / 8] = (
+                        dest[(destOffset + i) / 8] & ~(1 << (7 - (destOffset + i) % 8))) | val;
             }
-            dest[bytes + 1] = cast(ubyte)((0xFF << (8 - bits) & val) | (dest[bytes + 1] & 0xFF
-                    >> bits));
         }
-    }
-    else
-    {
-        size_t shift = destOffset - srcOffset;
-        dest[0] = (dest[0] & 0xFF << (8 - destOffset)) | (0xFF >> destOffset & src[0] >> shift);
-        for (int i = 1; i <= bytes; i++)
+        int bits = (length - 8 + destOffset) % 8;
+        size_t bytes = (length - 8 + destOffset) / 8;
+        if (destOffset < srcOffset)
         {
-            dest[i] = cast(ubyte)(src[i - 1] << (8 - shift) | src[i] >> shift);
-        }
-        if (bits > 0)
-        {
-            ubyte val = cast(ubyte)(src[bytes] << (8 - shift));
-            if (bits > shift)
+            size_t shift = srcOffset - destOffset;
+            dest[0] = (dest[0] & 0xFF << (8 - destOffset)) | (
+                    0xFF >> destOffset & (src[0] << shift | src[1] >> (8 - shift)));
+            for (int i = 1; i <= bytes; i++)
             {
-                val |= src[bytes + 1] >> shift;
+                dest[i] = cast(ubyte)(src[i] << shift | src[i + 1] >> (8 - shift));
             }
-            dest[bytes + 1] = cast(ubyte)((0xFF << (8 - bits) & val) | (dest[bytes + 1] & 0xFF
-                    >> bits));
+            if (bits > 0)
+            {
+                ubyte val = cast(ubyte)(src[bytes + 1] << shift);
+                if (bits > 8 - shift)
+                {
+                    val |= src[bytes + 2] >> (8 - shift);
+                }
+                dest[bytes + 1] = cast(ubyte)(
+                        (0xFF << (8 - bits) & val) | (dest[bytes + 1] & 0xFF >> bits));
+            }
+        }
+        else if (srcOffset == destOffset)
+        {
+            size_t middleBytes;
+            size_t rightBits;
+            if (srcOffset > 0)
+            {
+                ubyte val = src[0] & 0xFF >> srcOffset;
+                dest[0] = dest[0] & 0xFF << (8 - srcOffset) | val;
+                middleBytes = (length + srcOffset - 8) / 8;
+                rightBits = length + srcOffset - 8 - middleBytes * 8;
+            }
+            else
+            {
+                middleBytes = length / 8;
+                rightBits = length % 8;
+            }
+            if (middleBytes > 0)
+            {
+                dest[!!srcOffset .. !!srcOffset + middleBytes] = src[!!srcOffset
+                    .. !!srcOffset + middleBytes];
+            }
+            if (rightBits > 0)
+            {
+                ubyte val = src[!!srcOffset + middleBytes] & 0xFF << (8 - rightBits);
+                dest[!!srcOffset + middleBytes] = dest[!!srcOffset + middleBytes] & 0xFF
+                    >> rightBits | val;
+            }
+        }
+        else
+        {
+            size_t shift = destOffset - srcOffset;
+            dest[0] = (dest[0] & 0xFF << (8 - destOffset)) | (0xFF >> destOffset & src[0] >> shift);
+            for (int i = 1; i <= bytes; i++)
+            {
+                dest[i] = cast(ubyte)(src[i - 1] << (8 - shift) | src[i] >> shift);
+            }
+            if (bits > 0)
+            {
+                ubyte val = cast(ubyte)(src[bytes] << (8 - shift));
+                if (bits > shift)
+                {
+                    val |= src[bytes + 1] >> shift;
+                }
+                dest[bytes + 1] = cast(ubyte)(
+                        (0xFF << (8 - bits) & val) | (dest[bytes + 1] & 0xFF >> bits));
+            }
         }
     }
 }
 
-private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits = null)
+private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits = null)
 {
     buffer += offset / 8;
     offset %= 8;
@@ -781,47 +939,42 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
     }
 }
 
-@nogc private void fillBitsBuffer(ubyte* buffer, size_t offset, size_t length, bool value) nothrow
+@nogc private static void fillBitsBuffer(ubyte* buffer, size_t offset, size_t length, bool value) nothrow
 {
-    if (length == 0)
+    if (length != 0)
     {
-        return;
-    }
-    buffer += offset / 8;
-    offset %= 8;
-    if (length < 8)
-    {
-        for (int i = 0; i < length; i++)
+        buffer += offset / 8;
+        offset %= 8;
+        if (length < 8)
         {
-            if (value)
+            for (int i = 0; i < length; i++)
             {
-                buffer[(offset + i) / 8] |= 1 << (7 - (offset + i) % 8);
+                if (value)
+                {
+                    buffer[(offset + i) / 8] |= 1 << (7 - (offset + i) % 8);
+                }
+                else
+                {
+                    buffer[(offset + i) / 8] &= ~(1 << (7 - (offset + i) % 8));
+                }
             }
-            else
+        }
+        else
+        {
+            ubyte bvalue = value ? 0xFF : 0x00;
+            int leftBits = (8 - offset) % 8;
+            if (leftBits > 0)
             {
-                buffer[(offset + i) / 8] &= ~(1 << (7 - (offset + i) % 8));
+                buffer[0] = (buffer[0] & 0xFF << leftBits) | (bvalue & 0xFF >> (8 - leftBits));
             }
-        }
-    }
-    else
-    {
-        ubyte bvalue = 0;
-        for (int i = 0; i < 8; i++)
-        {
-            bvalue = cast(ubyte)(bvalue << 1 | value);
-        }
-        int leftBits = (8 - offset) % 8;
-        if (leftBits > 0)
-        {
-            buffer[0] = (buffer[0] & 0xFF << leftBits) | (bvalue & 0xFF >> (8 - leftBits));
-        }
-        size_t bytes = (length - leftBits) / 8;
-        buffer[leftBits > 0 .. leftBits > 0 + bytes] = bvalue;
-        int rightBits = (length - leftBits) & 8;
-        if (rightBits > 0)
-        {
-            buffer[leftBits > 0 + bytes] = (bvalue & 0xFF << (8 - rightBits)) | (
-                    buffer[leftBits > 0 + bytes] & 0xFF >> rightBits);
+            size_t bytes = (length - leftBits) / 8;
+            buffer[leftBits > 0 .. (leftBits > 0) + bytes] = bvalue;
+            int rightBits = (length - leftBits) % 8;
+            if (rightBits > 0)
+            {
+                buffer[(leftBits > 0) + bytes] = (bvalue & 0xFF << (8 - rightBits)) | (
+                        buffer[(leftBits > 0) + bytes] & 0xFF >> rightBits);
+            }
         }
     }
 }
@@ -954,6 +1107,25 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
         this._pixelFormat = pixelFormat;
     }
 
+    /// Creating a [Bitmap] instance with a gien indexed format and, if required, a palette
+    nothrow unittest
+    {
+        PixelFormat[] testFormats = [
+            PixelFormat.Format1bppIndexed, PixelFormat.Format16bppRgb555,
+            PixelFormat.Format24bppRgb, PixelFormat.Format32bppRgba
+        ];
+        foreach (PixelFormat pixelFormat; testFormats)
+        {
+            immutable Color[] palette = pixelFormat.indexed ? [Color.red] : [];
+            Bitmap img = new Bitmap(2, 2, pixelFormat, palette);
+            assert(img.width == 2);
+            assert(img.height == 2);
+            assert(img.skipX == 0);
+            assert(img.pixelFormat == pixelFormat);
+            assert(img.palette == palette);
+        }
+    }
+
     /**
      * Creates a [Bitmap] object with existing pixel data.
      *
@@ -982,7 +1154,7 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
      *         The array must be aligned to the alignment size of the pixel format.
      *         Its length must be the product between `stride` and `height`.
      */
-    @nogc @trusted public this(int width, int height, size_t skipX, size_t stride,
+    @trusted public this(int width, int height, size_t skipX, size_t stride,
             PixelFormat pixelFormat, immutable Color[] palette, bool bottomUp, inout void[] data) inout nothrow
     in
     {
@@ -1181,7 +1353,7 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
         case PixelFormat.Format16bppRgb565:
             ushort val = (cast(ushort*) ptr)[x];
             ubyte r = val >> 11 & 0b11111;
-            r = (r << 3 | r >> 3) & 0xFF;
+            r = (r << 3 | r >> 2) & 0xFF;
             ubyte g = val >> 5 & 0b111111;
             g = (g << 2 | g >> 4) & 0xFF;
             ubyte b = val & 0b11111;
@@ -1216,7 +1388,7 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
         case flipEndian(PixelFormat.Format16bppRgb565):
             ushort val = (cast(ushort*) ptr)[x];
             ubyte r = val >> 3 & 0b11111;
-            r = (r << 3 | r >> 3) & 0xFF;
+            r = (r << 3 | r >> 2) & 0xFF;
             ubyte g = val << 3 & 0b111000 | val >> 13 & 0b000111;
             g = (g << 2 | g >> 4) & 0xFF;
             ubyte b = val >> 8 & 0b11111;
@@ -1225,7 +1397,7 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
         case flipEndian(PixelFormat.Format32bppXrgb):
             uint bgrx = (cast(uint*) ptr)[x];
             ubyte r = bgrx >> 8 & 0xFF;
-            ubyte g = bgrx >> 12 & 0xFF;
+            ubyte g = bgrx >> 16 & 0xFF;
             ubyte b = bgrx >> 24;
             return Color(r, g, b);
         case flipEndian(PixelFormat.Format32bppArgb):
@@ -1379,6 +1551,134 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
         return this.readColor(ptr, x + this.skipX);
     }
 
+    /// Getting pixel colors with [getPixel]
+    unittest
+    {
+        Bitmap img = new Bitmap(2, 2, 0, 1, PixelFormat.Format1bppIndexed,
+                [Color.black, Color.white], false, cast(ubyte[])[
+                    0b01000000, 0b10000000
+        ]);
+        assert(img.getPixel(0, 0) == Color.black);
+        assert(img.getPixel(1, 0) == Color.white);
+        assert(img.getPixel(0, 1) == Color.white);
+        assert(img.getPixel(1, 1) == Color.black);
+        img = new Bitmap(2, 2, 0, 1, PixelFormat.Format4bppIndexed, [
+            Color.red, Color.green, Color.blue, Color.cyan
+        ], false, cast(ubyte[])[0x01, 0x23]);
+        assert(img.getPixel(0, 0) == Color.red);
+        assert(img.getPixel(1, 0) == Color.green);
+        assert(img.getPixel(0, 1) == Color.blue);
+        assert(img.getPixel(1, 1) == Color.cyan);
+        img = new Bitmap(2, 2, 0, 2, PixelFormat.Format8bppIndexed, [
+            Color.red, Color.green, Color.blue, Color.cyan
+        ], false, cast(ubyte[])[0, 1, 2, 3]);
+        assert(img.getPixel(0, 0) == Color.red);
+        assert(img.getPixel(1, 0) == Color.green);
+        assert(img.getPixel(0, 1) == Color.blue);
+        assert(img.getPixel(1, 1) == Color.cyan);
+        img = new Bitmap(2, 2, 0, 2, PixelFormat.Format8bppGray, null, false,
+                cast(ubyte[])[10, 20, 30, 40]);
+        assert(img.getPixel(0, 0) == Color.gray(10));
+        assert(img.getPixel(1, 0) == Color.gray(20));
+        assert(img.getPixel(0, 1) == Color.gray(30));
+        assert(img.getPixel(1, 1) == Color.gray(40));
+        img = new Bitmap(2, 2, 0, 4, PixelFormat.Format16bppRgb555, null, false, cast(ushort[])[
+            0b0_11111_00000_00000, 0b0_00000_11111_00000,
+            0b0_00000_00000_11111, 0b0_00000_11111_11111
+        ]);
+        assert(img.getPixel(0, 0) == Color.red);
+        assert(img.getPixel(1, 0) == Color.green);
+        assert(img.getPixel(0, 1) == Color.blue);
+        assert(img.getPixel(1, 1) == Color.cyan);
+        img = new Bitmap(2, 2, 0, 4, PixelFormat.Format16bppRgb565, null, false,
+                cast(ushort[])[
+                    0b11111_000000_00000, 0b00000_111111_00000,
+                    0b00000_000000_11111, 0b00000_111111_11111
+        ]);
+        assert(img.getPixel(0, 0) == Color.red);
+        assert(img.getPixel(1, 0) == Color.green);
+        assert(img.getPixel(0, 1) == Color.blue);
+        assert(img.getPixel(1, 1) == Color.cyan);
+        img = new Bitmap(2, 2, 0, 6, PixelFormat.Format24bppRgbBE, null, false,
+                cast(ubyte[3][])[
+                    cast(ubyte[3])[255, 0, 0], cast(ubyte[3])[0, 255, 0],
+                    cast(ubyte[3])[0, 0, 255], cast(ubyte[3])[0, 255, 255]
+        ]);
+        assert(img.getPixel(0, 0) == Color.red);
+        assert(img.getPixel(1, 0) == Color.green);
+        assert(img.getPixel(0, 1) == Color.blue);
+        assert(img.getPixel(1, 1) == Color.cyan);
+        img = new Bitmap(2, 2, 0, 8, PixelFormat.Format32bppXrgb, null, false,
+                cast(uint[])[0xAAFF0000, 0xBB00FF00, 0xCC0000FF, 0xDD00FFFF]);
+        assert(img.getPixel(0, 0) == Color.red);
+        assert(img.getPixel(1, 0) == Color.green);
+        assert(img.getPixel(0, 1) == Color.blue);
+        assert(img.getPixel(1, 1) == Color.cyan);
+        img = new Bitmap(2, 2, 0, 8, PixelFormat.Format32bppArgb, null, false,
+                cast(uint[])[0xFFFF0000, 0xFF00FF00, 0xFF0000FF, 0xAA00FFFF]);
+        assert(img.getPixel(0, 0) == Color.red);
+        assert(img.getPixel(1, 0) == Color.green);
+        assert(img.getPixel(0, 1) == Color.blue);
+        assert(img.getPixel(1, 1) == Color(0x00, 0xFF, 0xFF, 0xAA));
+        img = new Bitmap(2, 2, 0, 8, PixelFormat.Format32bppRgba, null, false,
+                cast(uint[])[0xFF0000FF, 0x00FF00FF, 0x0000FFFF, 0x00FFFFAA]);
+        assert(img.getPixel(0, 0) == Color.red);
+        assert(img.getPixel(1, 0) == Color.green);
+        assert(img.getPixel(0, 1) == Color.blue);
+        assert(img.getPixel(1, 1) == Color(0x00, 0xFF, 0xFF, 0xAA));
+        img = new Bitmap(2, 2, 0, 4, flipEndian(PixelFormat.Format16bppRgb555), null, false,
+                cast(ushort[])[
+                    0b00000000_01111100, 0b11100000_00000011,
+                    0b00011111_00000000, 0b11111111_00000011
+        ]);
+        assert(img.getPixel(0, 0) == Color.red);
+        assert(img.getPixel(1, 0) == Color.green);
+        assert(img.getPixel(0, 1) == Color.blue);
+        assert(img.getPixel(1, 1) == Color.cyan);
+        img = new Bitmap(2, 2, 0, 4, flipEndian(PixelFormat.Format16bppRgb565), null, false,
+                cast(ushort[])[
+                    0b00000000_11111000, 0b11100000_00000111,
+                    0b00011111_00000000, 0b11111111_00000111
+        ]);
+        assert(img.getPixel(0, 0) == Color.red);
+        assert(img.getPixel(1, 0) == Color.green);
+        assert(img.getPixel(0, 1) == Color.blue);
+        assert(img.getPixel(1, 1) == Color.cyan);
+        img = new Bitmap(2, 2, 0, 6, PixelFormat.Format24bppRgbLE, null, false,
+                cast(ubyte[3][])[
+                    cast(ubyte[3])[0, 0, 255], cast(ubyte[3])[0, 255, 0],
+                    cast(ubyte[3])[255, 0, 0], cast(ubyte[3])[255, 255, 0]
+        ]);
+        assert(img.getPixel(0, 0) == Color.red);
+        assert(img.getPixel(1, 0) == Color.green);
+        assert(img.getPixel(0, 1) == Color.blue);
+        assert(img.getPixel(1, 1) == Color.cyan);
+        img = new Bitmap(2, 2, 0, 8, flipEndian(PixelFormat.Format32bppXrgb),
+                null, false, cast(uint[])[
+                    0x0000FFAA, 0x00FF00BB, 0xFF0000CC, 0xFFFF00DD
+        ]);
+        assert(img.getPixel(0, 0) == Color.red);
+        assert(img.getPixel(1, 0) == Color.green);
+        assert(img.getPixel(0, 1) == Color.blue);
+        assert(img.getPixel(1, 1) == Color.cyan);
+        img = new Bitmap(2, 2, 0, 8, flipEndian(PixelFormat.Format32bppArgb),
+                null, false, cast(uint[])[
+                    0x0000FFFF, 0x00FF00FF, 0xFF0000FF, 0xFFFF00AA
+        ]);
+        assert(img.getPixel(0, 0) == Color.red);
+        assert(img.getPixel(1, 0) == Color.green);
+        assert(img.getPixel(0, 1) == Color.blue);
+        assert(img.getPixel(1, 1) == Color(0x00, 0xFF, 0xFF, 0xAA));
+        img = new Bitmap(2, 2, 0, 8, flipEndian(PixelFormat.Format32bppRgba),
+                null, false, cast(uint[])[
+                    0xFF0000FF, 0xFF00FF00, 0xFFFF0000, 0xAAFFFF00
+        ]);
+        assert(img.getPixel(0, 0) == Color.red);
+        assert(img.getPixel(1, 0) == Color.green);
+        assert(img.getPixel(0, 1) == Color.blue);
+        assert(img.getPixel(1, 1) == Color(0x00, 0xFF, 0xFF, 0xAA));
+    }
+
     /**
      * Sets the color of the specified pixel in this image. If the color isn't allowed by the pixel format or, for an indexed format, by the color table, an approximation will be used.
      *
@@ -1403,6 +1703,161 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
         this.writeColor(ptr, x + this.skipX, color);
     }
 
+    /// Setting pixel colors with [setPixel]
+    unittest
+    {
+        Bitmap img = new Bitmap(2, 2, PixelFormat.Format1bppIndexed, [
+            Color.black, Color.white
+        ]);
+        img.setPixel(0, 0, Color.black);
+        img.setPixel(1, 0, Color.white);
+        img.setPixel(0, 1, Color.white);
+        img.setPixel(1, 1, Color.black);
+        assert(img.getPixel(0, 0) == Color.black);
+        assert(img.getPixel(1, 0) == Color.white);
+        assert(img.getPixel(0, 1) == Color.white);
+        assert(img.getPixel(1, 1) == Color.black);
+        img = new Bitmap(2, 2, PixelFormat.Format4bppIndexed, [
+            Color.red, Color.green, Color.blue, Color.cyan
+        ]);
+        img.setPixel(0, 0, Color(250, 0, 0));
+        img.setPixel(1, 0, Color.green);
+        img.setPixel(0, 1, Color.blue);
+        img.setPixel(1, 1, Color.cyan);
+        assert(img.getPixel(0, 0) == Color.red);
+        assert(img.getPixel(1, 0) == Color.green);
+        assert(img.getPixel(0, 1) == Color.blue);
+        assert(img.getPixel(1, 1) == Color.cyan);
+        img = new Bitmap(2, 2, PixelFormat.Format8bppIndexed, [
+            Color.red, Color.green, Color.blue, Color.cyan
+        ]);
+        img.setPixel(0, 0, Color.red);
+        img.setPixel(1, 0, Color.green);
+        img.setPixel(0, 1, Color.blue);
+        img.setPixel(1, 1, Color.cyan);
+        assert(img.getPixel(0, 0) == Color.red);
+        assert(img.getPixel(1, 0) == Color.green);
+        assert(img.getPixel(0, 1) == Color.blue);
+        assert(img.getPixel(1, 1) == Color.cyan);
+        img = new Bitmap(2, 2, PixelFormat.Format8bppGray);
+        img.setPixel(0, 0, Color.gray(10));
+        img.setPixel(1, 0, Color.gray(20));
+        img.setPixel(0, 1, Color.gray(30));
+        img.setPixel(1, 1, Color.gray(40));
+        assert(img.getPixel(0, 0) == Color.gray(10));
+        assert(img.getPixel(1, 0) == Color.gray(20));
+        assert(img.getPixel(0, 1) == Color.gray(30));
+        assert(img.getPixel(1, 1) == Color.gray(40));
+        img = new Bitmap(2, 2, PixelFormat.Format16bppRgb555);
+        img.setPixel(0, 0, Color.red);
+        img.setPixel(1, 0, Color.green);
+        img.setPixel(0, 1, Color.blue);
+        img.setPixel(1, 1, Color.cyan);
+        assert(img.getPixel(0, 0) == Color.red);
+        assert(img.getPixel(1, 0) == Color.green);
+        assert(img.getPixel(0, 1) == Color.blue);
+        assert(img.getPixel(1, 1) == Color.cyan);
+        img = new Bitmap(2, 2, PixelFormat.Format16bppRgb565);
+        img.setPixel(0, 0, Color.red);
+        img.setPixel(1, 0, Color.green);
+        img.setPixel(0, 1, Color.blue);
+        img.setPixel(1, 1, Color.cyan);
+        assert(img.getPixel(0, 0) == Color.red);
+        assert(img.getPixel(1, 0) == Color.green);
+        assert(img.getPixel(0, 1) == Color.blue);
+        assert(img.getPixel(1, 1) == Color.cyan);
+        img = new Bitmap(2, 2, PixelFormat.Format24bppRgbBE);
+        img.setPixel(0, 0, Color.red);
+        img.setPixel(1, 0, Color.green);
+        img.setPixel(0, 1, Color.blue);
+        img.setPixel(1, 1, Color.cyan);
+        assert(img.getPixel(0, 0) == Color.red);
+        assert(img.getPixel(1, 0) == Color.green);
+        assert(img.getPixel(0, 1) == Color.blue);
+        assert(img.getPixel(1, 1) == Color.cyan);
+        img = new Bitmap(2, 2, PixelFormat.Format32bppXrgb);
+        img.setPixel(0, 0, Color.red);
+        img.setPixel(1, 0, Color.green);
+        img.setPixel(0, 1, Color.blue);
+        img.setPixel(1, 1, Color.cyan);
+        assert(img.getPixel(0, 0) == Color.red);
+        assert(img.getPixel(1, 0) == Color.green);
+        assert(img.getPixel(0, 1) == Color.blue);
+        assert(img.getPixel(1, 1) == Color.cyan);
+        img = new Bitmap(2, 2, PixelFormat.Format32bppArgb);
+        img.setPixel(0, 0, Color.red);
+        img.setPixel(1, 0, Color.green);
+        img.setPixel(0, 1, Color.blue);
+        img.setPixel(1, 1, Color(0x00, 0xFF, 0xFF, 0xAA));
+        assert(img.getPixel(0, 0) == Color.red);
+        assert(img.getPixel(1, 0) == Color.green);
+        assert(img.getPixel(0, 1) == Color.blue);
+        assert(img.getPixel(1, 1) == Color(0x00, 0xFF, 0xFF, 0xAA));
+        img = new Bitmap(2, 2, PixelFormat.Format32bppRgba);
+        img.setPixel(0, 0, Color.red);
+        img.setPixel(1, 0, Color.green);
+        img.setPixel(0, 1, Color.blue);
+        img.setPixel(1, 1, Color(0x00, 0xFF, 0xFF, 0xAA));
+        assert(img.getPixel(0, 0) == Color.red);
+        assert(img.getPixel(1, 0) == Color.green);
+        assert(img.getPixel(0, 1) == Color.blue);
+        assert(img.getPixel(1, 1) == Color(0x00, 0xFF, 0xFF, 0xAA));
+        img = new Bitmap(2, 2, flipEndian(PixelFormat.Format16bppRgb555));
+        img.setPixel(0, 0, Color.red);
+        img.setPixel(1, 0, Color.green);
+        img.setPixel(0, 1, Color.blue);
+        img.setPixel(1, 1, Color.cyan);
+        assert(img.getPixel(0, 0) == Color.red);
+        assert(img.getPixel(1, 0) == Color.green);
+        assert(img.getPixel(0, 1) == Color.blue);
+        assert(img.getPixel(1, 1) == Color.cyan);
+        img = new Bitmap(2, 2, flipEndian(PixelFormat.Format16bppRgb565));
+        img.setPixel(0, 0, Color.red);
+        img.setPixel(1, 0, Color.green);
+        img.setPixel(0, 1, Color.blue);
+        img.setPixel(1, 1, Color.cyan);
+        assert(img.getPixel(0, 0) == Color.red);
+        assert(img.getPixel(1, 0) == Color.green);
+        assert(img.getPixel(0, 1) == Color.blue);
+        assert(img.getPixel(1, 1) == Color.cyan);
+        img = new Bitmap(2, 2, PixelFormat.Format24bppRgbLE);
+        img.setPixel(0, 0, Color.red);
+        img.setPixel(1, 0, Color.green);
+        img.setPixel(0, 1, Color.blue);
+        img.setPixel(1, 1, Color.cyan);
+        assert(img.getPixel(0, 0) == Color.red);
+        assert(img.getPixel(1, 0) == Color.green);
+        assert(img.getPixel(0, 1) == Color.blue);
+        assert(img.getPixel(1, 1) == Color.cyan);
+        img = new Bitmap(2, 2, flipEndian(PixelFormat.Format32bppXrgb));
+        img.setPixel(0, 0, Color.red);
+        img.setPixel(1, 0, Color.green);
+        img.setPixel(0, 1, Color.blue);
+        img.setPixel(1, 1, Color.cyan);
+        assert(img.getPixel(0, 0) == Color.red);
+        assert(img.getPixel(1, 0) == Color.green);
+        assert(img.getPixel(0, 1) == Color.blue);
+        assert(img.getPixel(1, 1) == Color.cyan);
+        img = new Bitmap(2, 2, flipEndian(PixelFormat.Format32bppArgb));
+        img.setPixel(0, 0, Color.red);
+        img.setPixel(1, 0, Color.green);
+        img.setPixel(0, 1, Color.blue);
+        img.setPixel(1, 1, Color(0x00, 0xFF, 0xFF, 0xAA));
+        assert(img.getPixel(0, 0) == Color.red);
+        assert(img.getPixel(1, 0) == Color.green);
+        assert(img.getPixel(0, 1) == Color.blue);
+        assert(img.getPixel(1, 1) == Color(0x00, 0xFF, 0xFF, 0xAA));
+        img = new Bitmap(2, 2, flipEndian(PixelFormat.Format32bppRgba));
+        img.setPixel(0, 0, Color.red);
+        img.setPixel(1, 0, Color.green);
+        img.setPixel(0, 1, Color.blue);
+        img.setPixel(1, 1, Color(0x00, 0xFF, 0xFF, 0xAA));
+        assert(img.getPixel(0, 0) == Color.red);
+        assert(img.getPixel(1, 0) == Color.green);
+        assert(img.getPixel(0, 1) == Color.blue);
+        assert(img.getPixel(1, 1) == Color(0x00, 0xFF, 0xFF, 0xAA));
+    }
+
     /**
      * Checks whether the image is fully opaque.
      *
@@ -1414,8 +1869,8 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
     {
         if (this.indexed)
         {
-            bool allOpaque = false;
-            bool noneOpaque = false;
+            bool allOpaque = true;
+            bool noneOpaque = true;
             for (int i = 0; i < this.palette.length; i++)
             {
                 if (this.palette[i].a == 255)
@@ -1462,6 +1917,41 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
         return true;
     }
 
+    /// Checking whether an image is fully opaque through the [opaque] property
+    unittest
+    {
+        Bitmap img = new Bitmap(2, 2, PixelFormat.Format1bppIndexed, [
+            Color.red, Color.green
+        ]);
+        assert(img.opaque());
+        img.palette = [Color(0, 0, 0, 0), Color(0, 0, 0, 0)];
+        assert(!img.opaque());
+        img.palette = [Color.red, Color(0, 0, 0, 0)];
+        img.setPixel(0, 0, Color.red);
+        img.setPixel(1, 0, Color.red);
+        img.setPixel(0, 1, Color.red);
+        img.setPixel(1, 1, Color.red);
+        assert(img.opaque);
+        img.setPixel(0, 0, Color(0, 0, 0, 0));
+        assert(!img.opaque());
+        img = new Bitmap(2, 2, PixelFormat.Format24bppRgb);
+        assert(img.opaque());
+        img = new Bitmap(10, 10, PixelFormat.Format32bppRgba);
+        for (int y = 0; y < 10; y++)
+        {
+            for (int x = 0; x < 10; x++)
+            {
+                ubyte r = cast(ubyte)(x * 20);
+                ubyte g = cast(ubyte)(y * 20);
+                ubyte b = cast(ubyte)((x + y) * 10);
+                img.setPixel(x, y, Color(r, g, b));
+            }
+        }
+        assert(img.opaque());
+        img.setPixel(1, 5, Color(0x10, 0x10, 0x10, 0x10));
+        assert(!img.opaque());
+    }
+
     /**
      * Checks whether all pixels in the image are valid.
      *
@@ -1498,10 +1988,35 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
                         return false;
                     }
                 }
+                ptr += this.stride;
             }
-            ptr += this.stride;
         }
         return true;
+    }
+
+    /// Checking whether all pixels in an image are valid through the [valid] property
+    nothrow unittest
+    {
+        ubyte[] data = [0, 1, 2, 0];
+        Bitmap img = new Bitmap(2, 2, 0, 2, PixelFormat.Format8bppIndexed,
+                [Color.red, Color.green, Color.blue], false, data);
+        assert(img.valid());
+        data[3] = 3;
+        assert(!img.valid());
+        data = [0xFF, 0xFF];
+        img = new Bitmap(2, 2, 0, 1, PixelFormat.Format1bppIndexed, [
+            Color.red, Color.green
+        ], false, data);
+        assert(img.valid());
+        img.palette = [Color.red];
+        assert(!img.valid());
+        data = [0x11, 0x11];
+        img = new Bitmap(2, 2, 0, 1, PixelFormat.Format4bppIndexed, [
+            Color.red, Color.green
+        ], false, data);
+        assert(img.valid());
+        img.palette = [Color.red];
+        assert(!img.valid());
     }
 
     /**
@@ -1532,6 +2047,16 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
                 this.pixelFormat, this.palette, this.bottomUp, data);
     }
 
+    /// Creating a rectangular slice of an image.
+    /// The slice shares data with the original image, so modifying one changes the other.
+    unittest
+    {
+        Bitmap img = new Bitmap(2, 2, PixelFormat.Format32bppRgba);
+        Bitmap s = img.slice(Rectangle(1, 1, 1, 1));
+        s.setPixel(0, 0, Color.red);
+        assert(img.getPixel(1, 1) == Color.red);
+    }
+
     /**
      * Creates an independent copy of this image which does not share its pixel data.
      *
@@ -1546,6 +2071,18 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
             this.rawLine(yRange[y], bmp.data.ptr + bmp.stride * y, bmp.skipX);
         }
         return bmp;
+    }
+
+    /// Cloning the image.
+    /// The original image and the clone do not share pixel data, so modifying one does not affect the other.
+    unittest
+    {
+        Bitmap img = new Bitmap(2, 2, PixelFormat.Format32bppArgb);
+        img.setPixel(0, 0, Color.red);
+        Bitmap c = img.clone();
+        assert(c.getPixel(0, 0) == Color.red);
+        c.setPixel(0, 0, Color.blue);
+        assert(img.getPixel(0, 0) == Color.red);
     }
 
     @nogc @system private template Dim(T)
@@ -1638,27 +2175,29 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
         do
         {
             const(void)* ptr2 = source.data.ptr;
-            foreach (int y; 0 .. source.height)
+            for (int y = 0; y < source.height; y++)
             {
                 T[] row2 = (cast(T*) ptr2)[source.skipX .. source.skipX + source.width];
-                foreach (int x; 0 .. source.width)
+                for (int x = 0; x < source.width; x++)
                 {
                     T value = row2[x];
+                    int newX = x;
+                    int newY = y;
                     if (transpose)
                     {
-                        swap(x, y);
+                        swap(newX, newY);
                     }
                     if (flipHor)
                     {
-                        x = this.width - x - 1;
+                        newX = this.width - newX - 1;
                     }
                     if (flipVer)
                     {
-                        y = this.height - y - 1;
+                        newY = this.height - newY - 1;
                     }
-                    void* ptr1 = this.data.ptr + this.stride * y;
+                    void* ptr1 = this.data.ptr + this.stride * newY;
                     T[] row1 = (cast(T*) ptr1)[this.skipX .. this.skipX + this.width];
-                    row1[x] = value;
+                    row1[newX] = value;
                 }
                 ptr2 += source.stride;
             }
@@ -1681,34 +2220,36 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
         do
         {
             const(void)* ptr2 = source.data.ptr;
-            foreach (int y; 0 .. source.height)
+            for (int y = 0; y < source.height; y++)
             {
                 T[] row2 = (cast(T*) ptr2)[source.skipX .. source.skipX + source.width];
-                foreach (int x; 0 .. source.width)
+                for (int x = 0; x < source.width; x++)
                 {
                     T value = row2[x];
+                    int newX = x;
+                    int newY = y;
                     if (transpose)
                     {
-                        swap(x, y);
+                        swap(newX, newY);
                     }
                     if (flipHor)
                     {
-                        x = this.width - x - 1;
+                        newX = this.width - newX - 1;
                     }
                     if (flipVer)
                     {
-                        y = this.height - y - 1;
+                        newY = this.height - newY - 1;
                     }
-                    void* ptr1 = this.data.ptr + this.stride * y;
+                    void* ptr1 = this.data.ptr + this.stride * newY;
                     T[] row1 = (cast(T*) ptr1)[this.skipX .. this.skipX + this.width];
                     static if (__traits(isIntegral, T))
                     {
-                        row1[x] = swapEndian(value);
+                        row1[newX] = swapEndian(value);
                     }
                     else static if (__traits(isStaticArray, T))
                     {
                         reverse(value[]);
-                        row1[x] = value;
+                        row1[newX] = value;
                     }
                     else
                     {
@@ -1806,11 +2347,11 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
                 }
                 if (this.skipX % 2 == 1)
                 {
-                    ptr[this.skipX / 2] = (ptr[this.skipX / 2] & 0b11110000) | values[$ - 1];
-                    for (int x = 1; x < this.width; x += 2)
+                    ptr[this.skipX / 2] = (ptr[this.skipX / 2] & 0xF0) | values[$ - 1];
+                    for (int x = 1; x < this.width - 1; x += 2)
                     {
                         ptr[(this.skipX + x) / 2] = cast(ubyte)(
-                                values[$ - x - 2] << 4 | values[$ - x - 3]);
+                                values[$ - x - 1] << 4 | values[$ - x - 2] >> 4);
                     }
                     if (this.width % 2 == 0)
                     {
@@ -1838,6 +2379,70 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
             assert(this.bpp >= 8);
             this.sized!"flipHor"();
             break;
+        }
+    }
+
+    /// Flipping an image horizontally (along its vertical axis)
+    unittest
+    {
+        PixelFormat[] testFormats = [
+            PixelFormat.Format1bppIndexed, PixelFormat.Format4bppIndexed,
+            PixelFormat.Format8bppIndexed
+        ];
+        foreach (PixelFormat pixelFormat; testFormats)
+        {
+            Bitmap img = new Bitmap(2, 2, pixelFormat, [
+                Color.black, Color.white
+            ]);
+            img.setPixel(0, 0, Color.black);
+            img.setPixel(1, 0, Color.white);
+            img.setPixel(0, 1, Color.white);
+            img.setPixel(1, 1, Color.black);
+            img.flipHor();
+            assert(img.getPixel(0, 0) == Color.white);
+            assert(img.getPixel(0, 1) == Color.black);
+            assert(img.getPixel(1, 0) == Color.black);
+            assert(img.getPixel(1, 1) == Color.white);
+            img = new Bitmap(5, 1, pixelFormat, [Color.black, Color.white]);
+            img.setPixel(0, 0, Color.black);
+            img.setPixel(1, 0, Color.white);
+            img.setPixel(2, 0, Color.black);
+            img.setPixel(3, 0, Color.white);
+            img.setPixel(4, 0, Color.white);
+            img.flipHor();
+            assert(img.getPixel(0, 0) == Color.white);
+            assert(img.getPixel(1, 0) == Color.white);
+            assert(img.getPixel(2, 0) == Color.black);
+            assert(img.getPixel(3, 0) == Color.white);
+            assert(img.getPixel(4, 0) == Color.black);
+            img = img.slice(Rectangle(1, 0, 4, 1));
+            img.flipHor();
+            assert(img.getPixel(0, 0) == Color.black);
+            assert(img.getPixel(1, 0) == Color.white);
+            assert(img.getPixel(2, 0) == Color.black);
+            assert(img.getPixel(3, 0) == Color.white);
+        }
+        testFormats = [
+            PixelFormat.Format4bppIndexed, PixelFormat.Format8bppIndexed,
+            PixelFormat.Format16bppRgb555, PixelFormat.Format24bppRgb,
+            PixelFormat.Format32bppRgba
+        ];
+        foreach (PixelFormat pixelFormat; testFormats)
+        {
+            immutable Color[] colors = [
+                Color.red, Color.green, Color.blue, Color.black
+            ];
+            immutable Color[] palette = pixelFormat.indexed ? colors : [];
+            Bitmap img = new Bitmap(2, 2, pixelFormat, palette);
+            img.setPixel(0, 0, colors[0]);
+            img.setPixel(1, 0, colors[1]);
+            img.setPixel(0, 1, colors[2]);
+            img.setPixel(1, 1, colors[3]);
+            img.flipHor();
+            assert(img.getPixel(0, 0) == colors[1]);
+            assert(img.getPixel(1, 0) == colors[0]);
+            assert(img.getPixel(0, 1) == colors[3]);
+            assert(img.getPixel(1, 1) == colors[2]);
         }
     }
 
@@ -1873,6 +2478,52 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
         }
     }
 
+    /// Flipping an image vertically (along its horizontal axis)
+    unittest
+    {
+        PixelFormat[] testFormats = [
+            PixelFormat.Format1bppIndexed, PixelFormat.Format4bppIndexed,
+            PixelFormat.Format8bppIndexed
+        ];
+        foreach (PixelFormat pixelFormat; testFormats)
+        {
+            Bitmap img = new Bitmap(2, 2, pixelFormat, [
+                Color.black, Color.white
+            ]);
+            img.setPixel(0, 0, Color.black);
+            img.setPixel(1, 0, Color.white);
+            img.setPixel(0, 1, Color.white);
+            img.setPixel(1, 1, Color.black);
+            img.flipVer();
+            assert(img.getPixel(0, 0) == Color.white);
+            assert(img.getPixel(1, 0) == Color.black);
+            assert(img.getPixel(0, 1) == Color.black);
+            assert(img.getPixel(1, 1) == Color.white);
+        }
+        testFormats = [
+            PixelFormat.Format4bppIndexed, PixelFormat.Format8bppIndexed,
+            PixelFormat.Format16bppRgb555, PixelFormat.Format24bppRgb,
+            PixelFormat.Format32bppRgba
+        ];
+        foreach (PixelFormat pixelFormat; testFormats)
+        {
+            immutable Color[] colors = [
+                Color.red, Color.green, Color.blue, Color.black
+            ];
+            immutable Color[] palette = pixelFormat.indexed ? colors : [];
+            Bitmap img = new Bitmap(2, 2, pixelFormat, palette);
+            img.setPixel(0, 0, colors[0]);
+            img.setPixel(1, 0, colors[1]);
+            img.setPixel(0, 1, colors[2]);
+            img.setPixel(1, 1, colors[3]);
+            img.flipVer();
+            assert(img.getPixel(0, 0) == colors[2]);
+            assert(img.getPixel(1, 0) == colors[3]);
+            assert(img.getPixel(0, 1) == colors[0]);
+            assert(img.getPixel(1, 1) == colors[1]);
+        }
+    }
+
     /**
      * Rotates the image in place by a half circle.
      * Unused bits and color indices referring to identical colors are preserved exactly.
@@ -1887,11 +2538,12 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
                 for (int x = 0; x < this.width; x++)
                 {
                     size_t pos1 = this.stride * y + (this.skipX + x) / 8;
-                    size_t pos2 = this.stride * (height - y - 1) + (this.skipX + this.width - x - 1) / 8;
+                    size_t pos2 = this.stride * (this.height - y - 1) + (
+                            this.skipX + this.width - x - 1) / 8;
                     ubyte val1 = this._data[pos1];
                     ubyte val2 = this._data[pos2];
-                    int shift1 = 7 - (this.skipX + x) % 8;
-                    int shift2 = 7 - (this.skipX + this.width - x - 1) % 8;
+                    int shift1 = 7 - ((this.skipX + x) % 8);
+                    int shift2 = 7 - ((this.skipX + this.width - x - 1) % 8);
                     bool bit1 = (val1 >> shift1) & 1;
                     bool bit2 = (val2 >> shift2) & 1;
                     val1 = cast(ubyte)((val1 & ~(1 << shift1)) | bit2 << shift1);
@@ -1902,7 +2554,7 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
             }
             if (this.height % 2 == 1)
             {
-                assumeWontThrow(flipBits(this._data.ptr + this.stride * (this.height / 2 + 1),
+                assumeWontThrow(flipBits(this._data.ptr + this.stride * (this.height / 2),
                         this.skipX, this.width));
             }
             break;
@@ -1941,16 +2593,16 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
                 }
                 if (this.skipX % 2 == 1)
                 {
-                    ptr[this.skipX / 2] = (ptr[this.skipX / 2] & 0b11110000) | values[$ - 1];
-                    for (int x = 1; x < this.width; x += 2)
+                    ptr[this.skipX / 2] = (ptr[this.skipX / 2] & 0xF0) | values[$ - 1];
+                    for (int x = 1; x < this.width - 1; x += 2)
                     {
                         ptr[(this.skipX + x) / 2] = cast(ubyte)(
-                                values[$ - x - 2] << 4 | values[$ - x - 3]);
+                                values[$ - x - 1] << 4 | values[$ - x - 2]);
                     }
                     if (this.width % 2 == 0)
                     {
                         ptr[(this.skipX + this.width) / 2] = cast(ubyte)(
-                                values[$ - 1] << 4 | (ptr[(this.skipX + this.width) / 2] & 0xF));
+                                values[0] << 4 | (ptr[(this.skipX + this.width) / 2] & 0xF));
                     }
                 }
                 else
@@ -1963,7 +2615,7 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
                     if (this.width % 2 == 1)
                     {
                         ptr[(this.skipX + this.width) / 2] = cast(ubyte)(
-                                values[$ - 1] << 4 | (ptr[(this.skipX + this.width) / 2] & 0xF));
+                                values[0] << 4 | (ptr[(this.skipX + this.width) / 2] & 0xF));
                     }
                 }
             }
@@ -1972,6 +2624,126 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
             assert(this.bpp >= 8);
             this.sized!"flip"();
             break;
+        }
+    }
+
+    /// Flipping an image (rotating it by a half circle)
+    unittest
+    {
+        PixelFormat[] testFormats = [
+            PixelFormat.Format1bppIndexed, PixelFormat.Format4bppIndexed,
+            PixelFormat.Format8bppIndexed
+        ];
+        foreach (PixelFormat pixelFormat; testFormats)
+        {
+            Bitmap img = new Bitmap(3, 3, pixelFormat, [
+                Color.black, Color.white
+            ]);
+            img.setPixel(0, 0, Color.white);
+            img.setPixel(1, 0, Color.black);
+            img.setPixel(2, 0, Color.white);
+            img.setPixel(0, 1, Color.white);
+            img.setPixel(1, 1, Color.white);
+            img.setPixel(2, 1, Color.black);
+            img.setPixel(0, 2, Color.black);
+            img.setPixel(1, 2, Color.black);
+            img.setPixel(2, 2, Color.black);
+            img.flip();
+            assert(img.getPixel(0, 0) == Color.black);
+            assert(img.getPixel(1, 0) == Color.black);
+            assert(img.getPixel(2, 0) == Color.black);
+            assert(img.getPixel(0, 1) == Color.black);
+            assert(img.getPixel(1, 1) == Color.white);
+            assert(img.getPixel(2, 1) == Color.white);
+            assert(img.getPixel(0, 2) == Color.white);
+            assert(img.getPixel(1, 2) == Color.black);
+            assert(img.getPixel(2, 2) == Color.white);
+            img = img.slice(Rectangle(1, 0, 2, 3));
+            img.flip();
+            assert(img.getPixel(0, 0) == Color.white);
+            assert(img.getPixel(1, 0) == Color.black);
+            assert(img.getPixel(0, 1) == Color.white);
+            assert(img.getPixel(1, 1) == Color.white);
+            assert(img.getPixel(0, 2) == Color.black);
+            assert(img.getPixel(1, 2) == Color.black);
+            img = new Bitmap(5, 4, pixelFormat, [Color.black, Color.white]);
+            img.setPixel(0, 0, Color.black);
+            img.setPixel(1, 0, Color.white);
+            img.setPixel(2, 0, Color.black);
+            img.setPixel(3, 0, Color.white);
+            img.setPixel(4, 0, Color.white);
+            img.setPixel(0, 1, Color.black);
+            img.setPixel(1, 1, Color.white);
+            img.setPixel(2, 1, Color.black);
+            img.setPixel(3, 1, Color.black);
+            img.setPixel(4, 1, Color.white);
+            img.setPixel(0, 2, Color.black);
+            img.setPixel(1, 2, Color.white);
+            img.setPixel(2, 2, Color.white);
+            img.setPixel(3, 2, Color.black);
+            img.setPixel(4, 2, Color.white);
+            img.setPixel(0, 3, Color.black);
+            img.setPixel(1, 3, Color.black);
+            img.setPixel(2, 3, Color.white);
+            img.setPixel(3, 3, Color.black);
+            img.setPixel(4, 3, Color.white);
+            img.flip();
+            assert(img.getPixel(0, 0) == Color.white);
+            assert(img.getPixel(1, 0) == Color.black);
+            assert(img.getPixel(2, 0) == Color.white);
+            assert(img.getPixel(3, 0) == Color.black);
+            assert(img.getPixel(4, 0) == Color.black);
+            assert(img.getPixel(0, 1) == Color.white);
+            assert(img.getPixel(1, 1) == Color.black);
+            assert(img.getPixel(2, 1) == Color.white);
+            assert(img.getPixel(3, 1) == Color.white);
+            assert(img.getPixel(4, 1) == Color.black);
+            assert(img.getPixel(0, 2) == Color.white);
+            assert(img.getPixel(1, 2) == Color.black);
+            assert(img.getPixel(2, 2) == Color.black);
+            assert(img.getPixel(3, 2) == Color.white);
+            assert(img.getPixel(4, 2) == Color.black);
+            assert(img.getPixel(0, 3) == Color.white);
+            assert(img.getPixel(1, 3) == Color.white);
+            assert(img.getPixel(2, 3) == Color.black);
+            assert(img.getPixel(3, 3) == Color.white);
+            assert(img.getPixel(4, 3) == Color.black);
+            img = img.slice(Rectangle(1, 1, 4, 3));
+            img.flip();
+            assert(img.getPixel(0, 0) == Color.black);
+            assert(img.getPixel(1, 0) == Color.white);
+            assert(img.getPixel(2, 0) == Color.black);
+            assert(img.getPixel(3, 0) == Color.white);
+            assert(img.getPixel(0, 1) == Color.black);
+            assert(img.getPixel(1, 1) == Color.white);
+            assert(img.getPixel(2, 1) == Color.black);
+            assert(img.getPixel(3, 1) == Color.black);
+            assert(img.getPixel(0, 2) == Color.black);
+            assert(img.getPixel(1, 2) == Color.white);
+            assert(img.getPixel(2, 2) == Color.white);
+            assert(img.getPixel(3, 2) == Color.black);
+        }
+        testFormats = [
+            PixelFormat.Format4bppIndexed, PixelFormat.Format8bppIndexed,
+            PixelFormat.Format16bppRgb555, PixelFormat.Format24bppRgb,
+            PixelFormat.Format32bppRgba
+        ];
+        foreach (PixelFormat pixelFormat; testFormats)
+        {
+            immutable Color[] colors = [
+                Color.red, Color.green, Color.blue, Color.black
+            ];
+            immutable Color[] palette = pixelFormat.indexed ? colors : [];
+            Bitmap img = new Bitmap(2, 2, pixelFormat, palette);
+            img.setPixel(0, 0, colors[0]);
+            img.setPixel(1, 0, colors[1]);
+            img.setPixel(0, 1, colors[2]);
+            img.setPixel(1, 1, colors[3]);
+            img.flip();
+            assert(img.getPixel(0, 0) == colors[3]);
+            assert(img.getPixel(1, 0) == colors[2]);
+            assert(img.getPixel(0, 1) == colors[1]);
+            assert(img.getPixel(1, 1) == colors[0]);
         }
     }
 
@@ -1992,6 +2764,41 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
         const(ubyte)* ptr = this._data.ptr + this.stride * y;
         copyBitsBuffer(cast(ubyte*) dest, skipX * this.bpp, ptr,
                 this.skipX * this.bpp, this.width * this.bpp);
+    }
+
+    /// Reading a line of raw data from an image
+    @system nothrow unittest
+    {
+        Bitmap img = new Bitmap(32, 4, PixelFormat.Format1bppIndexed, [
+            Color.black, Color.white
+        ]);
+        img = img.slice(Rectangle(1, 0, 30, 4));
+        for (int y = 0; y < 4; y++)
+        {
+            for (int x = 0; x < 30; x++)
+            {
+                img.setPixel(x, y, ((x + y) % 2 == 1) ? Color.white : Color.black);
+            }
+        }
+        ubyte[5] dest;
+        for (int y = 0; y < 4; y++)
+        {
+            dest[] = 0;
+            img.rawLine(y, dest.ptr, y % 2);
+            assert(dest == [
+                0b01010101, 0b01010101, 0b01010101, 0b01010100, 0b00000000
+            ]);
+            dest[] = 0;
+            img.rawLine(y, dest.ptr, y % 2 + 1);
+            assert(dest == [
+                0b00101010, 0b10101010, 0b10101010, 0b10101010, 0b00000000
+            ]);
+            dest[] = 0;
+            img.rawLine(y, dest.ptr, y % 2 + 3);
+            assert(dest == [
+                0b00001010, 0b10101010, 0b10101010, 0b10101010, 0b10000000
+            ]);
+        }
     }
 
     /**
@@ -2018,9 +2825,9 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
             PixelFormat pixelFormat, const(Color)[] palette = null) const
     in
     {
+        assert((cast(size_t) dest) % alignSize == 0);
         if (pixelFormat.indexed)
         {
-            assert((cast(size_t) dest) % alignSize == 0);
             assert(palette == null || palette.length <= 1 << pixelFormat.bpp);
         }
         else
@@ -2038,7 +2845,7 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
         {
             this.rawLine(y, dest, skipX);
         }
-        else if (this.palette == null && pixelFormat == swapEndian(this.pixelFormat))
+        else if (this.palette == null && pixelFormat == flipEndian(this.pixelFormat))
         {
             this.sized!"rawLineSwapEndian"(y, dest, skipX);
         }
@@ -2049,6 +2856,48 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
                 writeColor(pixelFormat, palette, dest, skipX + x, color);
             }
         }
+    }
+
+    /// Reading a line of raw data from an image, optionally converting it to a different pixel format or palette.
+    /// When the given palette is empty, the same as that of the image is used.
+    /// WHen the pixel format and the palette are the same as in the image, data is preserved and copied as it is.
+    @system unittest
+    {
+        Bitmap img = new Bitmap(32, 2, PixelFormat.Format1bppIndexed, [
+            Color.black, Color.white
+        ]);
+        for (int y = 0; y < 2; y++)
+        {
+            for (int x = 0; x < 32; x++)
+            {
+                img.setPixel(x, y, ((x + y) % 2 == 1) ? Color.white : Color.black);
+            }
+        }
+        ubyte[5] dest1;
+        dest1[] = 0;
+        img.rawLine(0, dest1.ptr, 0, PixelFormat.Format1bppIndexed, [
+            Color.white, Color.black
+        ]);
+        assert(dest1 == [
+            0b10101010, 0b10101010, 0b10101010, 0b10101010, 0b00000000
+        ]);
+        img.rawLine(1, dest1.ptr, 0, PixelFormat.Format1bppIndexed, [
+            Color.white, Color.black
+        ]);
+        assert(dest1 == [
+            0b01010101, 0b01010101, 0b01010101, 0b01010101, 0b00000000
+        ]);
+        img = new Bitmap(2, 2, PixelFormat.Format32bppRgba);
+        img.setPixel(0, 0, Color(0x00102030));
+        img.setPixel(1, 0, Color(0x40506070));
+        img.setPixel(0, 1, Color(0x8090A0B0));
+        img.setPixel(1, 1, Color(0xC0D0E0F0));
+        uint[3] dest2;
+        dest2[] = 0;
+        img.rawLine(0, dest2.ptr, 0, PixelFormat.Format32bppRgba);
+        assert(dest2 == [0x00102030, 0x40506070, 0x00000000]);
+        img.rawLine(1, dest2.ptr, 0, flipEndian(PixelFormat.Format32bppRgba));
+        assert(dest2 == [0xB0A09080, 0xF0E0D0C0, 0x00000000]);
     }
 
     @trusted private void copyFrom(const Bitmap source, bool flipVer)
@@ -2088,6 +2937,22 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
     do
     {
         this.copyFrom(source, this.bottomUp ^ source.bottomUp);
+    }
+
+    /// Copying data from an image onto another
+    unittest
+    {
+        Bitmap img1 = new Bitmap(2, 2, PixelFormat.Format32bppRgba);
+        img1.setPixel(0, 0, Color.red);
+        img1.setPixel(1, 0, Color.green);
+        img1.setPixel(0, 1, Color.blue);
+        img1.setPixel(1, 1, Color.black);
+        Bitmap img2 = new Bitmap(2, 2, PixelFormat.Format32bppArgb);
+        img2.copyFrom(img1);
+        assert(img2.getPixel(0, 0) == Color.red);
+        assert(img2.getPixel(1, 0) == Color.green);
+        assert(img2.getPixel(0, 1) == Color.blue);
+        assert(img2.getPixel(1, 1) == Color.black);
     }
 
     /**
@@ -2135,7 +3000,7 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
                     this.sized!"from"(source, transpose, flipHor, flipVer);
                     return;
                 }
-                if (source.pixelFormat == flipEndian(source.pixelFormat))
+                if (source.pixelFormat == flipEndian(this.pixelFormat))
                 {
                     this.sized!"fromSwapEndian"(source, transpose, flipHor, flipVer);
                     return;
@@ -2145,9 +3010,9 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
             if (this.indexed && source.pixelFormat == this.pixelFormat
                     && source.palette == this.palette)
             {
-                foreach (int y; 0 .. source.height)
+                for (int y = 0; y < source.height; y++)
                 {
-                    foreach (int x; 0 .. source.width)
+                    for (int x = 0; x < source.width; x++)
                     {
                         uint index;
                         if (source.pixelFormat == PixelFormat.Format1bppIndexed)
@@ -2160,36 +3025,38 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
                             index = ((cast(ubyte*) ptr2)[(source.skipX + x) / 2]) >> ((1 - x % 2)
                                     * 4) & 0xF;
                         }
+                        int newX = x;
+                        int newY = y;
                         if (transpose)
                         {
-                            swap(x, y);
+                            swap(newX, newY);
                         }
                         if (flipHor)
                         {
-                            x = this.width - x - 1;
+                            newX = this.width - newX - 1;
                         }
                         if (flipVer)
                         {
-                            y = this.height - y - 1;
+                            newY = this.height - newY - 1;
                         }
-                        void* ptr1 = this.data.ptr + this.stride * y;
+                        void* ptr1 = this.data.ptr + this.stride * newY;
                         if (this.pixelFormat == PixelFormat.Format1bppIndexed)
                         {
                             if (index)
                             {
-                                (cast(ubyte*) ptr1)[(this.skipX + x) / 8] |= 1 << (7 - x % 8);
+                                (cast(ubyte*) ptr1)[(this.skipX + newX) / 8] |= 1 << (7 - newX % 8);
                             }
                             else
                             {
-                                (cast(ubyte*) ptr1)[(this.skipX + x) / 8] &= ~(1 << (7 - x % 8));
+                                (cast(ubyte*) ptr1)[(this.skipX + newX) / 8] &= ~(1 << (7 - newX % 8));
                             }
                         }
                         else
                         {
-                            ubyte vals = (cast(ubyte*) ptr1)[x / 2];
-                            vals &= ~(1 << ((1 - (this.skipX + x) % 2) * 4));
-                            vals |= index << ((1 - (this.skipX + x) % 2) * 4);
-                            (cast(ubyte*) ptr1)[(this.skipX + x) / 2] = vals;
+                            ubyte vals = (cast(ubyte*) ptr1)[(this.skipX + newX) / 2];
+                            vals &= ~(0x0F << ((1 - ((this.skipX + newX) % 2)) * 4));
+                            vals |= index << ((1 - ((this.skipX + newX) % 2)) * 4);
+                            (cast(ubyte*) ptr1)[(this.skipX + newX) / 2] = vals;
                         }
                     }
                     ptr2 += source.stride;
@@ -2197,25 +3064,27 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
             }
             else
             {
-                foreach (int y; 0 .. source.height)
+                for (int y = 0; y < source.height; y++)
                 {
-                    foreach (int x; 0 .. source.width)
+                    for (int x = 0; x < source.width; x++)
                     {
+                        int newX = x;
+                        int newY = y;
                         Color color = source.readColor(ptr2, source.skipX + x);
                         if (transpose)
                         {
-                            swap(x, y);
+                            swap(newX, newY);
                         }
                         if (flipHor)
                         {
-                            x = this.width - x - 1;
+                            newX = this.width - newX - 1;
                         }
                         if (flipVer)
                         {
-                            y = this.height - y - 1;
+                            newY = this.height - newY - 1;
                         }
-                        void* ptr1 = this.data.ptr + this.stride * y;
-                        this.writeColor(ptr1, this.skipX + x, color);
+                        void* ptr1 = this.data.ptr + this.stride * newY;
+                        this.writeColor(ptr1, this.skipX + newX, color);
                     }
                     ptr2 += source.stride;
                 }
@@ -2225,6 +3094,108 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
         {
             this.copyFrom(source, flipVer);
         }
+    }
+
+    /// Copying data from an image onto another, while optionally transposing it, flipping it vertically and flipping it horizontally
+    unittest
+    {
+        Bitmap img1 = new Bitmap(2, 2, PixelFormat.Format32bppRgba);
+        img1.setPixel(0, 0, Color.red);
+        img1.setPixel(1, 0, Color.green);
+        img1.setPixel(0, 1, Color.blue);
+        img1.setPixel(1, 1, Color.black);
+        PixelFormat[] testFormats = [
+            PixelFormat.Format32bppRgba, PixelFormat.Format32bppArgb,
+            flipEndian(PixelFormat.Format32bppRgba)
+        ];
+        foreach (PixelFormat pixelFormat; testFormats)
+        {
+            Bitmap img2 = new Bitmap(2, 2, pixelFormat);
+            img2.from(img1, false, false, false);
+            assert(img2.getPixel(0, 0) == Color.red);
+            assert(img2.getPixel(1, 0) == Color.green);
+            assert(img2.getPixel(0, 1) == Color.blue);
+            assert(img2.getPixel(1, 1) == Color.black);
+            img2.from(img1, true, false, false);
+            assert(img2.getPixel(0, 0) == Color.red);
+            assert(img2.getPixel(1, 0) == Color.blue);
+            assert(img2.getPixel(0, 1) == Color.green);
+            assert(img2.getPixel(1, 1) == Color.black);
+            img2.from(img1, false, true, true);
+            assert(img2.getPixel(0, 0) == Color.black);
+            assert(img2.getPixel(1, 0) == Color.blue);
+            assert(img2.getPixel(0, 1) == Color.green);
+            assert(img2.getPixel(1, 1) == Color.red);
+        }
+        img1 = new Bitmap(2, 2, PixelFormat.Format4bppIndexed, [
+            Color.red, Color.green, Color.blue, Color.black
+        ]);
+        img1.setPixel(0, 0, Color.red);
+        img1.setPixel(1, 0, Color.green);
+        img1.setPixel(0, 1, Color.blue);
+        img1.setPixel(1, 1, Color.black);
+        Bitmap img2 = new Bitmap(2, 2, PixelFormat.Format4bppIndexed,
+                [Color.red, Color.green, Color.blue, Color.black]);
+        img2.from(img1, false, false, false);
+        assert(img2.getPixel(0, 0) == Color.red);
+        assert(img2.getPixel(1, 0) == Color.green);
+        assert(img2.getPixel(0, 1) == Color.blue);
+        assert(img2.getPixel(1, 1) == Color.black);
+        img2.from(img1, true, false, false);
+        assert(img2.getPixel(0, 0) == Color.red);
+        assert(img2.getPixel(1, 0) == Color.blue);
+        assert(img2.getPixel(0, 1) == Color.green);
+        assert(img2.getPixel(1, 1) == Color.black);
+        img2.from(img1, false, true, true);
+        assert(img2.getPixel(0, 0) == Color.black);
+        assert(img2.getPixel(1, 0) == Color.blue);
+        assert(img2.getPixel(0, 1) == Color.green);
+        assert(img2.getPixel(1, 1) == Color.red);
+        img1 = new Bitmap(3, 3, PixelFormat.Format1bppIndexed, [
+            Color.black, Color.white
+        ]);
+        img1.setPixel(0, 0, Color.white);
+        img1.setPixel(1, 0, Color.black);
+        img1.setPixel(2, 0, Color.white);
+        img1.setPixel(0, 1, Color.white);
+        img1.setPixel(1, 1, Color.white);
+        img1.setPixel(2, 1, Color.black);
+        img1.setPixel(0, 2, Color.black);
+        img1.setPixel(1, 2, Color.black);
+        img1.setPixel(2, 2, Color.black);
+        img2 = new Bitmap(3, 3, PixelFormat.Format1bppIndexed, [
+            Color.black, Color.white
+        ]);
+        img2.from(img1, false, false, false);
+        assert(img2.getPixel(0, 0) == Color.white);
+        assert(img2.getPixel(1, 0) == Color.black);
+        assert(img2.getPixel(2, 0) == Color.white);
+        assert(img2.getPixel(0, 1) == Color.white);
+        assert(img2.getPixel(1, 1) == Color.white);
+        assert(img2.getPixel(2, 1) == Color.black);
+        assert(img2.getPixel(0, 2) == Color.black);
+        assert(img2.getPixel(1, 2) == Color.black);
+        assert(img2.getPixel(2, 2) == Color.black);
+        img2.from(img1, true, false, false);
+        assert(img2.getPixel(0, 0) == Color.white);
+        assert(img2.getPixel(1, 0) == Color.white);
+        assert(img2.getPixel(2, 0) == Color.black);
+        assert(img2.getPixel(0, 1) == Color.black);
+        assert(img2.getPixel(1, 1) == Color.white);
+        assert(img2.getPixel(2, 1) == Color.black);
+        assert(img2.getPixel(0, 2) == Color.white);
+        assert(img2.getPixel(1, 2) == Color.black);
+        assert(img2.getPixel(2, 2) == Color.black);
+        img2.from(img1, false, true, true);
+        assert(img2.getPixel(0, 0) == Color.black);
+        assert(img2.getPixel(1, 0) == Color.black);
+        assert(img2.getPixel(2, 0) == Color.black);
+        assert(img2.getPixel(0, 1) == Color.black);
+        assert(img2.getPixel(1, 1) == Color.white);
+        assert(img2.getPixel(2, 1) == Color.white);
+        assert(img2.getPixel(0, 2) == Color.white);
+        assert(img2.getPixel(1, 2) == Color.black);
+        assert(img2.getPixel(2, 2) == Color.white);
     }
 
     /**
@@ -2260,6 +3231,27 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
             }
             ptr1 += this.stride;
         }
+    }
+
+    /// Alpha-blending two images
+    unittest
+    {
+        Bitmap back = new Bitmap(2, 2, PixelFormat.Format32bppRgba);
+        back.setPixel(0, 0, Color.red);
+        back.setPixel(1, 0, Color.green);
+        back.setPixel(0, 1, Color(0, 0, 255, 127));
+        back.setPixel(1, 1, Color(0, 0, 0, 0));
+        Bitmap front = new Bitmap(2, 2, PixelFormat.Format32bppRgba);
+        front.setPixel(0, 0, Color.blue);
+        front.setPixel(1, 0, Color(0, 0, 0, 0));
+        front.setPixel(0, 1, Color(0, 0, 255, 127));
+        front.setPixel(1, 1, Color(0, 0, 0, 0));
+        back.blendFrom(front);
+        assert(back.getPixel(0, 0) == Color.blue);
+        assert(back.getPixel(1, 0) == Color.green);
+        Color c = back.getPixel(0, 1);
+        assert(c.r == 0 && c.g == 0 && c.b == 255 && 127 < c.a && c.a < 255);
+        assert(back.getPixel(1, 1) == Color(0, 0, 0, 0));
     }
 
     /**
@@ -2311,6 +3303,59 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
         }
     }
 
+    /// Mixing the colors of two images pixel-wise
+    unittest
+    {
+        Bitmap back = new Bitmap(2, 2, PixelFormat.Format32bppRgba);
+        back.setPixel(0, 0, Color.red);
+        back.setPixel(1, 0, Color.green);
+        back.setPixel(0, 1, Color(0, 0, 255, 127));
+        back.setPixel(1, 1, Color(0, 0, 0, 0));
+        Bitmap front = new Bitmap(2, 2, PixelFormat.Format32bppRgba);
+        front.setPixel(0, 0, Color.blue);
+        front.setPixel(1, 0, Color(0, 0, 0, 0));
+        front.setPixel(0, 1, Color(0, 0, 255, 127));
+        front.setPixel(1, 1, Color(0, 0, 0, 0));
+        back.mixFrom(front);
+        Color c = back.getPixel(0, 0);
+        assert(0 < c.r && c.r < 255 && 0 < c.b && c.b < 255 && c.g == 0 && c.a == 255);
+        c = back.getPixel(1, 0);
+        assert(c.r == 0 && c.g == 255 && c.b == 0 && 127 < c.a && c.a < 255);
+        c = back.getPixel(0, 1);
+        assert(c.r == 0 && c.g == 0 && c.b == 255 && c.a == 127);
+        c = back.getPixel(1, 1);
+        assert(c == Color(0, 0, 0, 0));
+        back = new Bitmap(2, 2, PixelFormat.Format24bppRgb);
+        back.setPixel(0, 0, Color.red);
+        back.setPixel(1, 0, Color.green);
+        back.setPixel(0, 1, Color.blue);
+        back.setPixel(1, 1, Color.black);
+        front = new Bitmap(2, 2, PixelFormat.Format24bppRgb);
+        front.setPixel(0, 0, Color.red);
+        front.setPixel(1, 0, Color.blue);
+        front.setPixel(0, 1, Color.green);
+        front.setPixel(1, 1, Color.white);
+        back.mixFrom(front);
+        assert(back.getPixel(0, 0) == Color.red);
+        assert(back.getPixel(1, 0) == back.getPixel(0, 1));
+        c = back.getPixel(1, 1);
+        assert(0 < c.r && c.r == c.g && c.g == c.b && c.b < 255);
+        back = new Bitmap(2, 2, PixelFormat.Format8bppGray);
+        back.setPixel(0, 0, Color.black);
+        back.setPixel(1, 0, Color.black);
+        back.setPixel(0, 1, Color.white);
+        back.setPixel(1, 1, Color.white);
+        front = new Bitmap(2, 2, PixelFormat.Format8bppGray);
+        front.setPixel(0, 0, Color.black);
+        front.setPixel(1, 0, Color.white);
+        front.setPixel(0, 1, Color.black);
+        front.setPixel(1, 1, Color.white);
+        back.mixFrom(front);
+        assert(back.getPixel(0, 0) == Color.black);
+        assert(back.getPixel(1, 0) == back.getPixel(0, 1));
+        assert(back.getPixel(1, 1) == Color.white);
+    }
+
     /**
      * Checks whether the given image has the same color as this image for every pixel.
      * The [bottomUp] property of both images is accounted for.
@@ -2349,6 +3394,36 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
             ptr1 += this.stride;
         }
         return true;
+    }
+
+    /// Checking whether two images are identical, optionally regarding all full transparencies as identical
+    unittest
+    {
+        Bitmap img1 = new Bitmap(2, 2, PixelFormat.Format32bppRgba);
+        img1.setPixel(0, 0, Color.red);
+        img1.setPixel(1, 0, Color.red);
+        img1.setPixel(0, 1, Color.red);
+        img1.setPixel(1, 1, Color(0, 0, 0, 0));
+        Bitmap img2 = new Bitmap(2, 2, PixelFormat.Format32bppRgba);
+        img2.setPixel(0, 0, Color.red);
+        img2.setPixel(1, 0, Color.red);
+        img2.setPixel(0, 1, Color.red);
+        img2.setPixel(1, 1, Color(255, 255, 255, 0));
+        assert(img1.equals(img2, true));
+        assert(!img1.equals(img2, false));
+        img1 = new Bitmap(2, 3, PixelFormat.Format32bppRgba);
+        img1.setPixel(0, 0, Color.black);
+        img1.setPixel(1, 0, Color.black);
+        img1.setPixel(0, 1, Color.black);
+        img1.setPixel(1, 1, Color.black);
+        img2 = new Bitmap(2, 3, PixelFormat.Format32bppRgba);
+        img1.setPixel(0, 0, Color.black);
+        img1.setPixel(1, 0, Color.black);
+        img1.setPixel(0, 1, Color.black);
+        img1.setPixel(1, 1, Color.black);
+        img1.setPixel(0, 2, Color.black);
+        img1.setPixel(1, 2, Color.black);
+        assert(!img1.equals(img2));
     }
 
     /**
@@ -2428,11 +3503,11 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
                 ];
                 break;
             case PixelFormat.Format32bppXrgb:
-                uint xrgb = 0xFF | color.rgba >> 8;
+                uint xrgb = 0xFF << 24 | color.rgba >> 8;
                 (cast(uint*) ptr)[this.skipX .. this.skipX + this.width] = xrgb;
                 break;
             case PixelFormat.Format32bppArgb:
-                uint argb = color.a | color.rgba >> 8;
+                uint argb = color.a << 24 | color.rgba >> 8;
                 (cast(uint*) ptr)[this.skipX .. this.skipX + this.width] = argb;
                 break;
             case PixelFormat.Format32bppRgba:
@@ -2467,6 +3542,58 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
             }
             ptr += this.stride;
         }
+    }
+
+    /// Filling an image with one uniform color
+    unittest
+    {
+        PixelFormat[] testFormats = [
+            PixelFormat.Format16bppRgb555BE, PixelFormat.Format16bppRgb555LE,
+            PixelFormat.Format16bppRgb565BE, PixelFormat.Format16bppRgb565LE,
+            PixelFormat.Format24bppRgbBE, PixelFormat.Format24bppRgbLE,
+            PixelFormat.Format32bppXrgbBE, PixelFormat.Format32bppXrgbLE,
+            PixelFormat.Format32bppArgbBE, PixelFormat.Format32bppArgbLE,
+            PixelFormat.Format32bppRgbaBE, PixelFormat.Format32bppRgbaLE
+        ];
+        foreach (PixelFormat pixelFormat; testFormats)
+        {
+            Bitmap img = new Bitmap(2, 2, pixelFormat);
+            img.paint(Color.red);
+            assert(img.getPixel(0, 0) == Color.red);
+            assert(img.getPixel(1, 0) == Color.red);
+            assert(img.getPixel(0, 1) == Color.red);
+            assert(img.getPixel(1, 1) == Color.red);
+        }
+        testFormats = [
+            PixelFormat.Format1bppIndexed, PixelFormat.Format4bppIndexed,
+            PixelFormat.Format8bppIndexed
+        ];
+        foreach (PixelFormat pixelFormat; testFormats)
+        {
+            Bitmap img = new Bitmap(25, 2, pixelFormat, [
+                Color.black, Color.white
+            ]);
+            for (int i = 0; i < 12; i++)
+            {
+                img = img.slice(Rectangle(1, 0, img.width - 2, 2));
+                Color c = i % 2 == 0 ? Color.black : Color.white;
+                img.paint(c);
+                for (int y = 0; y < 2; y++)
+                {
+                    for (int x = 0; x < img.width; x++)
+                    {
+                        assert(img.getPixel(x, y) == c);
+                    }
+                }
+            }
+        }
+        Bitmap img = new Bitmap(2, 2, PixelFormat.Format8bppGray);
+        Color c = Color.gray(127);
+        img.paint(c);
+        assert(img.getPixel(0, 0) == c);
+        assert(img.getPixel(1, 0) == c);
+        assert(img.getPixel(0, 1) == c);
+        assert(img.getPixel(1, 1) == c);
     }
 
     @system private void readWrite(bool Read, bool Write, R, A...)(R delegate(A args) func)
@@ -2524,6 +3651,28 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
         this.paint(cast(Color delegate(int, int) @system) brush);
     }
 
+    /// Programmatically generating pixel colors from pixel coordinates
+    unittest
+    {
+        Bitmap img = new Bitmap(10, 10, PixelFormat.Format32bppRgba);
+        img.paint((x, y) {
+            ubyte r = cast(ubyte)(x * 20);
+            ubyte g = cast(ubyte)(y * 20);
+            ubyte b = cast(ubyte)((x + y) * 10);
+            return Color(r, g, b);
+        });
+        for (int y = 0; y < 10; y++)
+        {
+            for (int x = 0; x < 10; x++)
+            {
+                ubyte r = cast(ubyte)(x * 20);
+                ubyte g = cast(ubyte)(y * 20);
+                ubyte b = cast(ubyte)((x + y) * 10);
+                assert(img.getPixel(x, y) == Color(r, g, b));
+            }
+        }
+    }
+
     /// ditto
     @system public void paint(Color delegate(int x, int y, Color prevColor) brush)
     {
@@ -2534,6 +3683,31 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
     @trusted public void paint(Color delegate(int x, int y, Color prevColor) @safe brush)
     {
         this.paint(cast(Color delegate(int, int, Color) @system) brush);
+    }
+
+    /// Programmatically updating the color of each pixel in an image based on its coordinates and its current color
+    unittest
+    {
+        Bitmap img = new Bitmap(10, 10, PixelFormat.Format32bppRgba);
+        img.paint((x, y) {
+            ubyte r = cast(ubyte)(x * 20);
+            ubyte g = cast(ubyte)(y * 20);
+            ubyte b = cast(ubyte)((x + y) * 10);
+            return Color(r, g, b);
+        });
+        img.paint((x, y, prevColor) {
+            return Color(255 - prevColor.r, 255 - prevColor.g, 255 - prevColor.b);
+        });
+        for (int y = 0; y < 10; y++)
+        {
+            for (int x = 0; x < 10; x++)
+            {
+                ubyte r = cast(ubyte)(255 - x * 20);
+                ubyte g = cast(ubyte)(255 - y * 20);
+                ubyte b = cast(ubyte)(255 - (x + y) * 10);
+                assert(img.getPixel(x, y) == Color(r, g, b));
+            }
+        }
     }
 
     /**
@@ -2559,6 +3733,28 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
         this.forEach(cast(void delegate(int, int) @system) action);
     }
 
+    /// Repeating an action for each pixel in the image using its coordinates
+    unittest
+    {
+        Bitmap img = new Bitmap(10, 10, PixelFormat.Format32bppRgba);
+        img.forEach((x, y) {
+            ubyte r = cast(ubyte)(x * 20);
+            ubyte g = cast(ubyte)(y * 20);
+            ubyte b = cast(ubyte)((x + y) * 10);
+            img.setPixel(x, y, Color(r, g, b));
+        });
+        for (int y = 0; y < 10; y++)
+        {
+            for (int x = 0; x < 10; x++)
+            {
+                ubyte r = cast(ubyte)(x * 20);
+                ubyte g = cast(ubyte)(y * 20);
+                ubyte b = cast(ubyte)((x + y) * 10);
+                assert(img.getPixel(x, y) == Color(r, g, b));
+            }
+        }
+    }
+
     /// ditto
     @system public void forEach(void delegate(int x, int y, Color color) action) const
     {
@@ -2569,6 +3765,31 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
     @trusted public void forEach(void delegate(int x, int y, Color color) @safe action) const
     {
         this.forEach(cast(void delegate(int, int, Color) @system) action);
+    }
+
+    /// Performing an action for each pixel in an image using its coordinates and its color
+    unittest
+    {
+        Bitmap img = new Bitmap(10, 10, PixelFormat.Format32bppRgba);
+        img.forEach((x, y) {
+            ubyte r = cast(ubyte)(x * 20);
+            ubyte g = cast(ubyte)(y * 20);
+            ubyte b = cast(ubyte)((x + y) * 10);
+            img.setPixel(x, y, Color(r, g, b));
+        });
+        img.forEach((x, y, color) {
+            img.setPixel(x, y, Color(255 - color.r, 255 - color.g, 255 - color.b));
+        });
+        for (int y = 0; y < 10; y++)
+        {
+            for (int x = 0; x < 10; x++)
+            {
+                ubyte r = cast(ubyte)(255 - x * 20);
+                ubyte g = cast(ubyte)(255 - y * 20);
+                ubyte b = cast(ubyte)(255 - (x + y) * 10);
+                assert(img.getPixel(x, y) == Color(r, g, b));
+            }
+        }
     }
 
     /**
@@ -2594,12 +3815,12 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
     {
         static struct Result
         {
-            private const Bitmap _self;
+            private Bitmap _self;
             private size_t _x0;
             private size_t _x1;
             private const(ubyte)* _ptr;
 
-            @nogc @trusted private this(const Bitmap self, int y)
+            private @nogc @trusted this(const Bitmap self, int y)
             in
             {
                 assert(self !is null);
@@ -2609,7 +3830,7 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
             {
                 this._x0 = self.skipX;
                 this._x1 = self.skipX + self.width;
-                this._self = self;
+                this._self = cast(Bitmap) self;
                 this._ptr = self._data.ptr + self.stride * y;
             }
 
@@ -2696,9 +3917,9 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
             }
 
             /// A copy of the range, as a view on the same underlying data.
-            public @nogc @property @safe Result save() const nothrow
+            public @nogc @property @trusted Result save() const nothrow
             {
-                return this;
+                return cast(Result) this;
             }
 
             /// The pixel color corresponding to the end of the array.
@@ -2781,16 +4002,165 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
         return Result(this, y);
     }
 
+    /// Scanning a line of pixels in an image
+    @system unittest
+    {
+        Bitmap img = new Bitmap(100, 1, PixelFormat.Format32bppRgba);
+        for (int x = 0; x < 100; x++)
+        {
+            img.setPixel(x, 0, Color.gray(cast(ubyte)(2 * x)));
+        }
+        auto row = img.scanLine(0);
+        assert(!row.empty);
+        assert(row.length == 100);
+        assert(row.front == Color.gray(0));
+        assert(row[0] == Color.gray(0));
+        assert(row[49] == Color.gray(2 * 49));
+        assert(row[99] == Color.gray(2 * 99));
+        assert(row.back == Color.gray(2 * 99));
+        auto cpy = row.save;
+        assert(!cpy.empty);
+        assert(cpy.length == 100);
+        assert(cpy.front == Color.gray(0));
+        assert(cpy[0] == Color.gray(0));
+        assert(cpy[49] == Color.gray(2 * 49));
+        assert(cpy[99] == Color.gray(2 * 99));
+        assert(cpy.back == Color.gray(2 * 99));
+        row.popFront();
+        assert(!row.empty);
+        assert(row.length == 99);
+        assert(row.front == Color.gray(2));
+        assert(row[0] == Color.gray(2));
+        assert(row[48] == Color.gray(2 * 49));
+        assert(row[98] == Color.gray(2 * 99));
+        assert(row.back == Color.gray(2 * 99));
+        Color c = row.moveFront();
+        assert(c == Color.gray(2));
+        assert(!row.empty);
+        assert(row.length == 98);
+        assert(row.front == Color.gray(2 * 2));
+        assert(row[0] == Color.gray(2 * 2));
+        assert(row[47] == Color.gray(2 * 49));
+        assert(row[97] == Color.gray(2 * 99));
+        assert(row.back == Color.gray(2 * 99));
+        row.popBack();
+        assert(!row.empty);
+        assert(row.length == 97);
+        assert(row.front == Color.gray(2 * 2));
+        assert(row[0] == Color.gray(2 * 2));
+        assert(row[47] == Color.gray(2 * 49));
+        assert(row[96] == Color.gray(2 * 98));
+        assert(row.back == Color.gray(2 * 98));
+        c = row.moveBack();
+        assert(c == Color.gray(2 * 98));
+        assert(!row.empty);
+        assert(row.length == 96);
+        assert(row.front == Color.gray(2 * 2));
+        assert(row[0] == Color.gray(2 * 2));
+        assert(row[47] == Color.gray(2 * 49));
+        assert(row[95] == Color.gray(2 * 97));
+        assert(row.back == Color.gray(2 * 97));
+        c = row.moveAt(10);
+        assert(c == Color.gray(2 * 12));
+        assert(row[0] == Color.gray(2 * 12));
+        assert(row[37] == Color.gray(2 * 49));
+        assert(row[85] == Color.gray(2 * 97));
+        assert(row.back == Color.gray(2 * 97));
+        assert(!cpy.empty);
+        assert(cpy.length == 100);
+        assert(cpy.front == Color.gray(0));
+        assert(cpy[0] == Color.gray(0));
+        assert(cpy[49] == Color.gray(2 * 49));
+        assert(cpy[99] == Color.gray(2 * 99));
+        assert(cpy.back == Color.gray(2 * 99));
+        int i = 0;
+        auto cpy1 = cpy.save;
+        foreach (Color color; cpy)
+        {
+            assert(color == Color.gray(cast(ubyte)(2 * i)));
+            i++;
+        }
+        assert(i == 100);
+        i = 0;
+        cpy = cpy1.save;
+        foreach (Color color; cpy)
+        {
+            assert(color == Color.gray(cast(ubyte)(2 * i)));
+            i++;
+            if (i == 50)
+            {
+                break;
+            }
+        }
+        assert(i == 50);
+        cpy = cpy1.save;
+        foreach (size_t x, Color color; cpy)
+        {
+            assert(color == Color.gray(cast(ubyte)(2 * x)));
+        }
+        cpy = cpy1.save;
+        foreach (size_t x, Color color; cpy)
+        {
+            assert(color == Color.gray(cast(ubyte)(2 * x)));
+            if (x == 50)
+            {
+                break;
+            }
+        }
+        cpy = cpy1.save;
+        foreach (int x, Color color; cpy)
+        {
+            assert(color == Color.gray(cast(ubyte)(2 * x)));
+        }
+        cpy = cpy1.save;
+        foreach (int x, Color color; cpy)
+        {
+            assert(color == Color.gray(cast(ubyte)(2 * x)));
+            if (x == 50)
+            {
+                break;
+            }
+        }
+    }
+
     /// A range of Y coordinate values scanning the image from top to bottom.
     @nogc @property public pure auto yTopDown() const nothrow
     {
         return this.bottomUp ? iota(this.height - 1, -1, -1) : iota(0, this.height, 1);
     }
 
+    /// Scanning the Y coordinates of an image from top to bottom
+    nothrow unittest
+    {
+        import std.array : array;
+
+        Bitmap img = new Bitmap(10, 10, PixelFormat.Format32bppRgba);
+        assert(!img.bottomUp);
+        auto r = img.yTopDown;
+        assert(array(r) == [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+        img.bottomUp = true;
+        r = img.yTopDown;
+        assert(array(r) == [9, 8, 7, 6, 5, 4, 3, 2, 1, 0]);
+    }
+
     /// A range of Y coordinate values scanning the image from bootom to top.
     @nogc @property public pure auto yBottomUp() const nothrow
     {
         return this.bottomUp ? iota(0, this.height, 1) : iota(this.height - 1, -1, -1);
+    }
+
+    /// Scanning the Y coordinates of an image from bottom to top
+    nothrow unittest
+    {
+        import std.array : array;
+
+        Bitmap img = new Bitmap(10, 10, PixelFormat.Format32bppRgba);
+        assert(!img.bottomUp);
+        auto r = img.yBottomUp;
+        assert(array(r) == [9, 8, 7, 6, 5, 4, 3, 2, 1, 0]);
+        img.bottomUp = true;
+        r = img.yBottomUp;
+        assert(array(r) == [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
     }
 
     /**
@@ -2846,22 +4216,83 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
         }
     }
 
+    /// Copying the color values of an image onto a matrix of [Color] instances.
+    /// If the `transpose` parameter is `false`, pixel values in the matrix are accessed using `[x][y]` indices.
+    /// If the `transpose` parameters is `true`, pixel values in the matrix are accessed using `[y][x]` indices.
+    unittest
+    {
+        Bitmap img = new Bitmap(10, 20, PixelFormat.Format32bppRgba);
+        for (int y = 0; y < 20; y++)
+        {
+            for (int x = 0; x < 10; x++)
+            {
+                ubyte r = cast(ubyte)(x * 20);
+                ubyte g = cast(ubyte)(y * 10);
+                ubyte b = cast(ubyte)(x * 10 + y * 5);
+                img.setPixel(x, y, Color(r, g, b));
+            }
+        }
+        Color[][] matrix = new Color[][](10, 20);
+        img.toMatrix(matrix, false);
+        for (int y = 0; y < 20; y++)
+        {
+            for (int x = 0; x < 10; x++)
+            {
+                ubyte r = cast(ubyte)(x * 20);
+                ubyte g = cast(ubyte)(y * 10);
+                ubyte b = cast(ubyte)(x * 10 + y * 5);
+                assert(matrix[x][y] == Color(r, g, b));
+            }
+        }
+        matrix = new Color[][](20, 10);
+        img.toMatrix(matrix, true);
+        for (int y = 0; y < 20; y++)
+        {
+            for (int x = 0; x < 10; x++)
+            {
+                ubyte r = cast(ubyte)(x * 20);
+                ubyte g = cast(ubyte)(y * 10);
+                ubyte b = cast(ubyte)(x * 10 + y * 5);
+                assert(matrix[y][x] == Color(r, g, b));
+            }
+        }
+        img = new Bitmap(10, 20, PixelFormat.Format32bppArgb);
+        for (int y = 0; y < 20; y++)
+        {
+            for (int x = 0; x < 10; x++)
+            {
+                ubyte r = cast(ubyte)(x * 20);
+                ubyte g = cast(ubyte)(y * 10);
+                ubyte b = cast(ubyte)(x * 10 + y * 5);
+                img.setPixel(x, y, Color(r, g, b));
+            }
+        }
+        img.toMatrix(matrix, true);
+        for (int y = 0; y < 20; y++)
+        {
+            for (int x = 0; x < 10; x++)
+            {
+                ubyte r = cast(ubyte)(x * 20);
+                ubyte g = cast(ubyte)(y * 10);
+                ubyte b = cast(ubyte)(x * 10 + y * 5);
+                assert(matrix[y][x] == Color(r, g, b));
+            }
+        }
+    }
+
     @trusted private inout(Color[][]) auxMatrix(inout Color[] vec, bool transpose) const nothrow
     in (vec.length == this.width * this.height)
     out (result)
     {
         if (transpose)
         {
-            if (transpose)
-            {
-                assert(result.length == this.height);
-                assert(all!(r => r.length == this.width)(result));
-            }
-            else
-            {
-                assert(result.length == this.width);
-                assert(all!(c => c.length == this.height)(result));
-            }
+            assert(result.length == this.height);
+            assert(all!(r => r.length == this.width)(result));
+        }
+        else
+        {
+            assert(result.length == this.width);
+            assert(all!(c => c.length == this.height)(result));
         }
     }
     do
@@ -2904,6 +4335,67 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
         this.toMatrix(aux, transpose);
     }
 
+    /// Copying the color values of an image onto a vectorized matrix of [Color] instances
+    unittest
+    {
+        Bitmap img = new Bitmap(10, 20, PixelFormat.Format32bppRgba);
+        for (int y = 0; y < 20; y++)
+        {
+            for (int x = 0; x < 10; x++)
+            {
+                ubyte r = cast(ubyte)(x * 20);
+                ubyte g = cast(ubyte)(y * 10);
+                ubyte b = cast(ubyte)(x * 10 + y * 5);
+                img.setPixel(x, y, Color(r, g, b));
+            }
+        }
+        Color[] matrix = new Color[200];
+        img.toMatrix(matrix, false);
+        for (int y = 0; y < 20; y++)
+        {
+            for (int x = 0; x < 10; x++)
+            {
+                ubyte r = cast(ubyte)(x * 20);
+                ubyte g = cast(ubyte)(y * 10);
+                ubyte b = cast(ubyte)(x * 10 + y * 5);
+                assert(matrix[x * 20 + y] == Color(r, g, b));
+            }
+        }
+        img.toMatrix(matrix, true);
+        for (int y = 0; y < 20; y++)
+        {
+            for (int x = 0; x < 10; x++)
+            {
+                ubyte r = cast(ubyte)(x * 20);
+                ubyte g = cast(ubyte)(y * 10);
+                ubyte b = cast(ubyte)(x * 10 + y * 5);
+                assert(matrix[y * 10 + x] == Color(r, g, b));
+            }
+        }
+        img = new Bitmap(10, 20, PixelFormat.Format32bppArgb);
+        for (int y = 0; y < 20; y++)
+        {
+            for (int x = 0; x < 10; x++)
+            {
+                ubyte r = cast(ubyte)(x * 20);
+                ubyte g = cast(ubyte)(y * 10);
+                ubyte b = cast(ubyte)(x * 10 + y * 5);
+                img.setPixel(x, y, Color(r, g, b));
+            }
+        }
+        img.toMatrix(matrix, true);
+        for (int y = 0; y < 20; y++)
+        {
+            for (int x = 0; x < 10; x++)
+            {
+                ubyte r = cast(ubyte)(x * 20);
+                ubyte g = cast(ubyte)(y * 10);
+                ubyte b = cast(ubyte)(x * 10 + y * 5);
+                assert(matrix[y * 10 + x] == Color(r, g, b));
+            }
+        }
+    }
+
     /**
      * Converts the image to a matrix of color values.
      *
@@ -2941,6 +4433,69 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
         Color[][] matrix = this.auxMatrix(vector, transpose);
         this.toMatrix(matrix, transpose);
         return matrix;
+    }
+
+    /// Creating a matrix of [Color] instances containing the color values of an image.
+    /// The matrix is guaranteed to be continuous.
+    /// If the `transpose` parameter is `false`, pixel values in the matrix are accessed using `[x][y]` indices.
+    /// If the `transpose` parameters is `true`, pixel values in the matrix are accessed using `[y][x]` indices.
+    unittest
+    {
+        Bitmap img = new Bitmap(10, 20, PixelFormat.Format32bppRgba);
+        for (int y = 0; y < 20; y++)
+        {
+            for (int x = 0; x < 10; x++)
+            {
+                ubyte r = cast(ubyte)(x * 20);
+                ubyte g = cast(ubyte)(y * 10);
+                ubyte b = cast(ubyte)(x * 10 + y * 5);
+                img.setPixel(x, y, Color(r, g, b));
+            }
+        }
+        Color[][] matrix = img.toMatrix(false);
+        for (int y = 0; y < 20; y++)
+        {
+            for (int x = 0; x < 10; x++)
+            {
+                ubyte r = cast(ubyte)(x * 20);
+                ubyte g = cast(ubyte)(y * 10);
+                ubyte b = cast(ubyte)(x * 10 + y * 5);
+                assert(matrix[x][y] == Color(r, g, b));
+            }
+        }
+        matrix = img.toMatrix(true);
+        for (int y = 0; y < 20; y++)
+        {
+            for (int x = 0; x < 10; x++)
+            {
+                ubyte r = cast(ubyte)(x * 20);
+                ubyte g = cast(ubyte)(y * 10);
+                ubyte b = cast(ubyte)(x * 10 + y * 5);
+                assert(matrix[y][x] == Color(r, g, b));
+            }
+        }
+        img = new Bitmap(10, 20, PixelFormat.Format32bppArgb);
+        for (int y = 0; y < 20; y++)
+        {
+            for (int x = 0; x < 10; x++)
+            {
+                ubyte r = cast(ubyte)(x * 20);
+                ubyte g = cast(ubyte)(y * 10);
+                ubyte b = cast(ubyte)(x * 10 + y * 5);
+                img.setPixel(x, y, Color(r, g, b));
+            }
+        }
+        matrix = img.toMatrix(true);
+        for (int y = 0; y < 20; y++)
+        {
+            for (int x = 0; x < 10; x++)
+            {
+                ubyte r = cast(ubyte)(x * 20);
+                ubyte g = cast(ubyte)(y * 10);
+                ubyte b = cast(ubyte)(x * 10 + y * 5);
+                assert(matrix[y][x] == Color(r, g, b));
+            }
+        }
     }
 
     /**
@@ -2996,6 +4551,70 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
         }
     }
 
+    /// Copying the color values in a matrix of [Color] instances onto the pixels of an image.
+    /// If the `transpose` parameter is `false`, pixel values in the matrix are accessed using `[x][y]` indices.
+    /// If the `transpose` parameters is `true`, pixel values in the matrix are accessed using `[y][x]` indices.
+    unittest
+    {
+        Bitmap img = new Bitmap(10, 20, PixelFormat.Format32bppRgba);
+        Color[][] matrix = new Color[][](10, 20);
+        for (int y = 0; y < 20; y++)
+        {
+            for (int x = 0; x < 10; x++)
+            {
+                ubyte r = cast(ubyte)(x * 20);
+                ubyte g = cast(ubyte)(y * 10);
+                ubyte b = cast(ubyte)(x * 10 + y * 5);
+                matrix[x][y] = Color(r, g, b);
+            }
+        }
+        img.fromMatrix(matrix, false);
+        for (int y = 0; y < 20; y++)
+        {
+            for (int x = 0; x < 10; x++)
+            {
+                ubyte r = cast(ubyte)(x * 20);
+                ubyte g = cast(ubyte)(y * 10);
+                ubyte b = cast(ubyte)(x * 10 + y * 5);
+                assert(img.getPixel(x, y) == Color(r, g, b));
+            }
+        }
+        matrix = new Color[][](20, 10);
+        for (int y = 0; y < 20; y++)
+        {
+            for (int x = 0; x < 10; x++)
+            {
+                ubyte r = cast(ubyte)(x * 20);
+                ubyte g = cast(ubyte)(y * 10);
+                ubyte b = cast(ubyte)(x * 10 + y * 5);
+                matrix[y][x] = Color(r, g, b);
+            }
+        }
+        img.fromMatrix(matrix, true);
+        for (int y = 0; y < 20; y++)
+        {
+            for (int x = 0; x < 10; x++)
+            {
+                ubyte r = cast(ubyte)(x * 20);
+                ubyte g = cast(ubyte)(y * 10);
+                ubyte b = cast(ubyte)(x * 10 + y * 5);
+                assert(img.getPixel(x, y) == Color(r, g, b));
+            }
+        }
+        img = new Bitmap(10, 20, PixelFormat.Format32bppArgb);
+        img.fromMatrix(matrix, true);
+        for (int y = 0; y < 20; y++)
+        {
+            for (int x = 0; x < 10; x++)
+            {
+                ubyte r = cast(ubyte)(x * 20);
+                ubyte g = cast(ubyte)(y * 10);
+                ubyte b = cast(ubyte)(x * 10 + y * 5);
+                assert(img.getPixel(x, y) == Color(r, g, b));
+            }
+        }
+    }
+
     /**
      * Pastes the given vectorized matrix of color values onto the image.
      *
@@ -3014,8 +4633,69 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
         this.fromMatrix(aux, transpose);
     }
 
+    /// Copying the color values in a vectorized matrix of [Color] instances onto the pixels of an image
+    unittest
+    {
+        Bitmap img = new Bitmap(10, 20, PixelFormat.Format32bppRgba);
+        Color[] matrix = new Color[200];
+        for (int y = 0; y < 20; y++)
+        {
+            for (int x = 0; x < 10; x++)
+            {
+                ubyte r = cast(ubyte)(x * 20);
+                ubyte g = cast(ubyte)(y * 10);
+                ubyte b = cast(ubyte)(x * 10 + y * 5);
+                matrix[x * 20 + y] = Color(r, g, b);
+            }
+        }
+        img.fromMatrix(matrix, false);
+        for (int y = 0; y < 20; y++)
+        {
+            for (int x = 0; x < 10; x++)
+            {
+                ubyte r = cast(ubyte)(x * 20);
+                ubyte g = cast(ubyte)(y * 10);
+                ubyte b = cast(ubyte)(x * 10 + y * 5);
+                assert(img.getPixel(x, y) == Color(r, g, b));
+            }
+        }
+        for (int y = 0; y < 20; y++)
+        {
+            for (int x = 0; x < 10; x++)
+            {
+                ubyte r = cast(ubyte)(x * 20);
+                ubyte g = cast(ubyte)(y * 10);
+                ubyte b = cast(ubyte)(x * 10 + y * 5);
+                matrix[y * 10 + x] = Color(r, g, b);
+            }
+        }
+        img.fromMatrix(matrix, true);
+        for (int y = 0; y < 20; y++)
+        {
+            for (int x = 0; x < 10; x++)
+            {
+                ubyte r = cast(ubyte)(x * 20);
+                ubyte g = cast(ubyte)(y * 10);
+                ubyte b = cast(ubyte)(x * 10 + y * 5);
+                assert(img.getPixel(x, y) == Color(r, g, b));
+            }
+        }
+        img = new Bitmap(10, 20, PixelFormat.Format32bppArgb);
+        img.fromMatrix(matrix, true);
+        for (int y = 0; y < 20; y++)
+        {
+            for (int x = 0; x < 10; x++)
+            {
+                ubyte r = cast(ubyte)(x * 20);
+                ubyte g = cast(ubyte)(y * 10);
+                ubyte b = cast(ubyte)(x * 10 + y * 5);
+                assert(img.getPixel(x, y) == Color(r, g, b));
+            }
+        }
+    }
+
     /**
-     * Counts the amount of times a color appears in the image.
+     * Counts the amount of times each color appears in the image.
      *
      * Returns:
      *     An associative array of the amount of times each color appears in the image.
@@ -3029,6 +4709,47 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
         size_t[Color] counts;
         this.forEach((x, y, c) { counts[c]++; });
         return counts;
+    }
+
+    /// Counting the number of times each color appears in an image
+    unittest
+    {
+        Bitmap img = new Bitmap(5, 5, PixelFormat.Format32bppRgba);
+        img.setPixel(0, 0, Color.red);
+        img.setPixel(1, 0, Color.red);
+        img.setPixel(2, 0, Color.red);
+        img.setPixel(3, 0, Color.red);
+        img.setPixel(4, 0, Color.red);
+        img.setPixel(0, 1, Color.green);
+        img.setPixel(1, 1, Color.blue);
+        img.setPixel(2, 1, Color.cyan);
+        img.setPixel(3, 1, Color.magenta);
+        img.setPixel(4, 1, Color.yellow);
+        img.setPixel(0, 2, Color.red);
+        img.setPixel(1, 2, Color.red);
+        img.setPixel(2, 2, Color.red);
+        img.setPixel(3, 2, Color.red);
+        img.setPixel(4, 2, Color.red);
+        img.setPixel(0, 3, Color(0, 0, 0, 0));
+        img.setPixel(1, 3, Color(0, 0, 0, 0));
+        img.setPixel(2, 3, Color(0, 0, 0, 0));
+        img.setPixel(3, 3, Color(0, 0, 0, 0));
+        img.setPixel(4, 3, Color(0, 0, 0, 0));
+        img.setPixel(0, 4, Color(255, 255, 255, 0));
+        img.setPixel(1, 4, Color(255, 255, 255, 0));
+        img.setPixel(2, 4, Color(255, 255, 255, 0));
+        img.setPixel(3, 4, Color(255, 255, 255, 0));
+        img.setPixel(4, 4, Color(255, 255, 255, 0));
+        size_t[Color] counts = img.counts();
+        // See: https://forum.dlang.org/post/fmzxhrqyxuactuhwskgx@forum.dlang.org
+        assert(counts[Color(255, 0, 0)] == 10);
+        assert(counts[Color(0, 255, 0)] == 1);
+        assert(counts[Color(0, 0, 255)] == 1);
+        assert(counts[Color(0, 255, 255)] == 1);
+        assert(counts[Color(255, 0, 255)] == 1);
+        assert(counts[Color(255, 255, 0)] == 1);
+        assert(counts[Color(0, 0, 0, 0)] == 5);
+        assert(counts[Color(255, 255, 255, 0)] == 5);
     }
 
     /**
@@ -3078,6 +4799,62 @@ private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits =
             ptr += this.stride;
         }
         return counts;
+    }
+
+    /// Counting the amount of times each color index appears in an image which uses an indexed pixel format
+    unittest
+    {
+        Bitmap img = new Bitmap(3, 3, PixelFormat.Format1bppIndexed, [
+            Color.black, Color.white
+        ]);
+        img.setPixel(0, 0, Color.white);
+        img.setPixel(1, 0, Color.black);
+        img.setPixel(2, 0, Color.white);
+        img.setPixel(0, 1, Color.white);
+        img.setPixel(1, 1, Color.white);
+        img.setPixel(2, 1, Color.black);
+        img.setPixel(0, 2, Color.black);
+        img.setPixel(1, 2, Color.black);
+        img.setPixel(2, 2, Color.black);
+        size_t[] counts = img.indexCounts();
+        assert(counts == [5, 4]);
+        PixelFormat[] testFormats = [
+            PixelFormat.Format4bppIndexed, PixelFormat.Format8bppIndexed
+        ];
+        foreach (PixelFormat pixelFormat; testFormats)
+        {
+            img = new Bitmap(5, 5, pixelFormat, [
+                Color.red, Color.green, Color.blue, Color.cyan, Color.magenta,
+                Color.yellow
+            ]);
+            img.setPixel(0, 0, Color.red);
+            img.setPixel(0, 1, Color.red);
+            img.setPixel(0, 2, Color.red);
+            img.setPixel(0, 3, Color.red);
+            img.setPixel(0, 4, Color.red);
+            img.setPixel(1, 0, Color.red);
+            img.setPixel(1, 1, Color.green);
+            img.setPixel(1, 2, Color.blue);
+            img.setPixel(1, 3, Color.green);
+            img.setPixel(1, 4, Color.blue);
+            img.setPixel(2, 0, Color.red);
+            img.setPixel(2, 1, Color.red);
+            img.setPixel(2, 2, Color.red);
+            img.setPixel(2, 3, Color.red);
+            img.setPixel(2, 4, Color.red);
+            img.setPixel(3, 0, Color.cyan);
+            img.setPixel(3, 1, Color.cyan);
+            img.setPixel(3, 2, Color.cyan);
+            img.setPixel(3, 3, Color.cyan);
+            img.setPixel(3, 4, Color.cyan);
+            img.setPixel(4, 0, Color.magenta);
+            img.setPixel(4, 1, Color.red);
+            img.setPixel(4, 2, Color.red);
+            img.setPixel(4, 3, Color.red);
+            img.setPixel(4, 4, Color.red);
+            counts = img.indexCounts();
+            assert(counts == [15, 2, 2, 5, 1, 0]);
+        }
     }
 
     invariant
