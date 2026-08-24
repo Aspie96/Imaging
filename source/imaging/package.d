@@ -175,6 +175,8 @@ public enum PixelFormat
     }
 }
 
+/// Value of [indexed] for each pixel format.
+/// Indexed formats are those with "Indexed" in their name.
 pure nothrow @nogc @safe unittest
 {
     assert(PixelFormat.Format1bppIndexed.indexed);
@@ -219,6 +221,8 @@ pure nothrow @nogc @safe unittest
     }
 }
 
+/// Value of [bpp] for each pixel format.
+/// The number of bits per pixel is in the name of each format.
 pure nothrow @nogc @safe unittest
 {
     assert(PixelFormat.Format1bppIndexed.bpp == 1);
@@ -257,6 +261,8 @@ pure nothrow @nogc @safe unittest
     }
 }
 
+/// Value of [alignSize] for each pixel format.
+// The alignment size for each pixel fomat is the same as that of the integral type with the same size if any exists or 1 otherwise.
 pure nothrow @nogc @safe unittest
 {
     assert(PixelFormat.Format1bppIndexed.alignSize == 1);
@@ -302,6 +308,8 @@ pure nothrow @nogc @safe unittest
     return cast(PixelFormat)(pixelFormat - 1);
 }
 
+/// Output of [flipEndian] for each pixel format.
+/// When a pixel format has no more than 8 bits per pixel swapping its endianness doesn't change it.
 pure nothrow @nogc @safe unittest
 {
     assert(flipEndian(PixelFormat.Format1bppIndexed) == PixelFormat.Format1bppIndexed);
@@ -386,6 +394,7 @@ pure nothrow @nogc @safe unittest
         this.rgba = rgba;
     }
 
+    /// Creating a [Color] instance from a value in hexadecimal form
     pure nothrow @nogc unittest
     {
         Color c = Color(0xBA595EFF);
@@ -404,7 +413,7 @@ pure nothrow @nogc @safe unittest
      *     b = The blue component value for the color.
      *     a = The alpha component value for the color.
      */
-    @nogc public pure this(ubyte r, ubyte g, ubyte b, ubyte a) nothrow
+    @nogc public pure this(ubyte r, ubyte g, ubyte b, ubyte a = 0xFF) nothrow
     {
         this.r = r;
         this.g = g;
@@ -412,28 +421,13 @@ pure nothrow @nogc @safe unittest
         this.a = a;
     }
 
+    /// Creating a [Color] instance from R, G, B and A values.
+    /// The alpha value defaults to the maximum, representing full opaqueness.
     pure nothrow @nogc unittest
     {
         Color c = Color(0xBA, 0x59, 0x5E, 0xFF);
         assert(c.rgba == 0xBA595EFF);
-    }
-
-    /**
-     * Creates a [Color] object representing a fully opaque color with the given red, green and blue.
-     *
-     * Params:
-     *     r = The red component value for the color.
-     *     g = The green component value for the color.
-     *     b = The blue component value for the color.
-     */
-    @nogc public pure this(ubyte r, ubyte g, ubyte b) nothrow
-    {
-        this(r, g, b, 0xFF);
-    }
-
-    pure nothrow @nogc unittest
-    {
-        Color c = Color(0xBA, 0x59, 0x5E);
+        c = Color(0xBA, 0x59, 0x5E);
         assert(c.rgba == 0xBA595EFF);
     }
 
@@ -479,13 +473,18 @@ pure nothrow @nogc @safe unittest
         return Color(luma, luma, luma);
     }
 
+    /// Representing a number of shades of gray
     pure nothrow @nogc unittest
     {
-        Color c = Color.gray(0xBA);
-        assert(c.r == 0xBA);
-        assert(c.g == 0xBA);
-        assert(c.b == 0xBA);
-        assert(c.a == 0xFF);
+        for (int i = 0; i < 50; i++)
+        {
+            ubyte l = cast(ubyte)((i + 1) * 2);
+            Color c = Color.gray(l);
+            assert(c.r == l);
+            assert(c.g == l);
+            assert(c.b == l);
+            assert(c.a == 0xFF);
+        }
     }
 
     /**
@@ -500,6 +499,7 @@ pure nothrow @nogc @safe unittest
         return ((this.r * 299 + this.g * 587 + this.b * 114) + 500) / 1000;
     }
 
+    /// Getting the luma for a color
     pure nothrow @nogc unittest
     {
         Color c = Color.gray(0xBA);
@@ -564,9 +564,12 @@ pure nothrow @nogc @safe unittest
         return sqrt(cast(float) squared);
     }
 
+    /// Computing the difference between two colors.
+    /// It is symmmetric and 0 for two identical colors, as well as for any two full transparencies.
     pure nothrow @nogc unittest
     {
         assert(Color.red.dist(Color.d) == Color.d.dist(Color.red));
+        assert(Color.red.dist(Color.red) == 0);
         assert(Color(0x00, 0x00, 0x00, 0x00).dist(Color(0xFF, 0xFF, 0xFF, 0x00)) == 0);
     }
 }
@@ -612,6 +615,7 @@ static assert(Color.alignof == int.alignof);
     return Color(rr, rg, rb, ra);
 }
 
+/// Alpha-blending colors
 pure nothrow @nogc @safe unittest
 {
     assert(blend(Color.red, Color.blue) == Color.blue);
@@ -683,6 +687,7 @@ in (0 <= factor && factor <= 1)
     return Color(rr, rg, rb, ra);
 }
 
+/// Mixing colors
 pure nothrow @nogc @safe unittest
 {
     Color c1 = mix(Color.red, Color.green);
@@ -1102,6 +1107,7 @@ private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[]
         this._pixelFormat = pixelFormat;
     }
 
+    /// Creating a [Bitmap] instance with a gien indexed format and, if required, a palette
     nothrow unittest
     {
         PixelFormat[] testFormats = [
@@ -1545,6 +1551,7 @@ private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[]
         return this.readColor(ptr, x + this.skipX);
     }
 
+    /// Getting pixel colors with [getPixel]
     unittest
     {
         Bitmap img = new Bitmap(2, 2, 0, 1, PixelFormat.Format1bppIndexed,
@@ -1696,6 +1703,7 @@ private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[]
         this.writeColor(ptr, x + this.skipX, color);
     }
 
+    /// Setting pixel colors with [setPixel]
     unittest
     {
         Bitmap img = new Bitmap(2, 2, PixelFormat.Format1bppIndexed, [
@@ -1909,6 +1917,7 @@ private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[]
         return true;
     }
 
+    /// Checking whether an image is fully opaque through the [opaque] property
     unittest
     {
         Bitmap img = new Bitmap(2, 2, PixelFormat.Format1bppIndexed, [
@@ -1985,6 +1994,7 @@ private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[]
         return true;
     }
 
+    /// Checking whether all pixels in an image are valid through the [valid] property
     nothrow unittest
     {
         ubyte[] data = [0, 1, 2, 0];
@@ -2037,6 +2047,8 @@ private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[]
                 this.pixelFormat, this.palette, this.bottomUp, data);
     }
 
+    /// Creating a rectangular slice of an image.
+    /// The slice shares data with the original image, so modifying one changes the other.
     unittest
     {
         Bitmap img = new Bitmap(2, 2, PixelFormat.Format32bppRgba);
@@ -2061,6 +2073,8 @@ private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[]
         return bmp;
     }
 
+    /// Cloning the image.
+    /// The original image and the clone do not share pixel data, so modifying one does not affect the other.
     unittest
     {
         Bitmap img = new Bitmap(2, 2, PixelFormat.Format32bppArgb);
@@ -2368,6 +2382,7 @@ private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[]
         }
     }
 
+    /// Flipping an image horizontally (along its vertical axis)
     unittest
     {
         PixelFormat[] testFormats = [
@@ -2463,6 +2478,7 @@ private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[]
         }
     }
 
+    /// Flipping an image vertically (along its horizontal axis)
     unittest
     {
         PixelFormat[] testFormats = [
@@ -2611,6 +2627,7 @@ private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[]
         }
     }
 
+    /// Flipping an image (rotating it by a half circle)
     unittest
     {
         PixelFormat[] testFormats = [
@@ -2749,6 +2766,7 @@ private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[]
                 this.skipX * this.bpp, this.width * this.bpp);
     }
 
+    /// Reading a line of raw data from an image
     @system nothrow unittest
     {
         Bitmap img = new Bitmap(32, 4, PixelFormat.Format1bppIndexed, [
@@ -2840,6 +2858,9 @@ private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[]
         }
     }
 
+    /// Reading a line of raw data from an image, optionally converting it to a different pixel format or palette.
+    /// When the given palette is empty, the same as that of the image is used.
+    /// WHen the pixel format and the palette are the same as in the image, data is preserved and copied as it is.
     @system unittest
     {
         Bitmap img = new Bitmap(32, 2, PixelFormat.Format1bppIndexed, [
@@ -2918,6 +2939,7 @@ private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[]
         this.copyFrom(source, this.bottomUp ^ source.bottomUp);
     }
 
+    /// Copying data from an image onto another
     unittest
     {
         Bitmap img1 = new Bitmap(2, 2, PixelFormat.Format32bppRgba);
@@ -3074,6 +3096,7 @@ private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[]
         }
     }
 
+    /// Copying data from an image onto another, while optionally transposing it, flipping it vertically and flipping it horizontally
     unittest
     {
         Bitmap img1 = new Bitmap(2, 2, PixelFormat.Format32bppRgba);
@@ -3210,6 +3233,7 @@ private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[]
         }
     }
 
+    /// Alpha-blending two images
     unittest
     {
         Bitmap back = new Bitmap(2, 2, PixelFormat.Format32bppRgba);
@@ -3279,6 +3303,7 @@ private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[]
         }
     }
 
+    /// Mixing the colors of two images pixel-wise
     unittest
     {
         Bitmap back = new Bitmap(2, 2, PixelFormat.Format32bppRgba);
@@ -3371,6 +3396,7 @@ private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[]
         return true;
     }
 
+    /// Checking whether two images are identical, optionally regarding all full transparencies as identical
     unittest
     {
         Bitmap img1 = new Bitmap(2, 2, PixelFormat.Format32bppRgba);
@@ -3518,6 +3544,7 @@ private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[]
         }
     }
 
+    /// Filling an image with one uniform color
     unittest
     {
         PixelFormat[] testFormats = [
@@ -3624,6 +3651,7 @@ private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[]
         this.paint(cast(Color delegate(int, int) @system) brush);
     }
 
+    /// Programmatically generating pixel colors from pixel coordinates
     unittest
     {
         Bitmap img = new Bitmap(10, 10, PixelFormat.Format32bppRgba);
@@ -3657,6 +3685,7 @@ private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[]
         this.paint(cast(Color delegate(int, int, Color) @system) brush);
     }
 
+    /// Programmatically updating the color of each pixel in an image based on its coordinates and its current color
     unittest
     {
         Bitmap img = new Bitmap(10, 10, PixelFormat.Format32bppRgba);
@@ -3704,6 +3733,7 @@ private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[]
         this.forEach(cast(void delegate(int, int) @system) action);
     }
 
+    /// Repeating an action for each pixel in the image using its coordinates
     unittest
     {
         Bitmap img = new Bitmap(10, 10, PixelFormat.Format32bppRgba);
@@ -3737,6 +3767,7 @@ private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[]
         this.forEach(cast(void delegate(int, int, Color) @system) action);
     }
 
+    /// Performing an action for each pixel in an image using its coordinates and its color
     unittest
     {
         Bitmap img = new Bitmap(10, 10, PixelFormat.Format32bppRgba);
@@ -3971,6 +4002,7 @@ private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[]
         return Result(this, y);
     }
 
+    /// Scanning a line of pixels in an image
     @system unittest
     {
         Bitmap img = new Bitmap(100, 1, PixelFormat.Format32bppRgba);
@@ -4097,6 +4129,7 @@ private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[]
         return this.bottomUp ? iota(this.height - 1, -1, -1) : iota(0, this.height, 1);
     }
 
+    /// Scanning the Y coordinates of an image from top to bottom
     nothrow unittest
     {
         import std.array : array;
@@ -4116,6 +4149,7 @@ private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[]
         return this.bottomUp ? iota(0, this.height, 1) : iota(this.height - 1, -1, -1);
     }
 
+    /// Scanning the Y coordinates of an image from bottom to top
     nothrow unittest
     {
         import std.array : array;
@@ -4182,6 +4216,9 @@ private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[]
         }
     }
 
+    /// Copying the color values of an image onto a matrix of [Color] instances.
+    /// If the `transpose` parameter is `false`, pixel values in the matrix are accessed using `[x][y]` indices.
+    /// If the `transpose` parameters is `true`, pixel values in the matrix are accessed using `[y][x]` indices.
     unittest
     {
         Bitmap img = new Bitmap(10, 20, PixelFormat.Format32bppRgba);
@@ -4298,6 +4335,7 @@ private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[]
         this.toMatrix(aux, transpose);
     }
 
+    /// Copying the color values of an image onto a vectorized matrix of [Color] instances
     unittest
     {
         Bitmap img = new Bitmap(10, 20, PixelFormat.Format32bppRgba);
@@ -4397,6 +4435,10 @@ private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[]
         return matrix;
     }
 
+    /// Creating a matrix of [Color] instances containing the color values of an image.
+    /// The matrix is guaranteed to be continuous.
+    /// If the `transpose` parameter is `false`, pixel values in the matrix are accessed using `[x][y]` indices.
+    /// If the `transpose` parameters is `true`, pixel values in the matrix are accessed using `[y][x]` indices.
     unittest
     {
         Bitmap img = new Bitmap(10, 20, PixelFormat.Format32bppRgba);
@@ -4509,6 +4551,9 @@ private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[]
         }
     }
 
+    /// Copying the color values in a matrix of [Color] instances onto the pixels of an image.
+    /// If the `transpose` parameter is `false`, pixel values in the matrix are accessed using `[x][y]` indices.
+    /// If the `transpose` parameters is `true`, pixel values in the matrix are accessed using `[y][x]` indices.
     unittest
     {
         Bitmap img = new Bitmap(10, 20, PixelFormat.Format32bppRgba);
@@ -4588,6 +4633,7 @@ private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[]
         this.fromMatrix(aux, transpose);
     }
 
+    /// Copying the color values in a vectorized matrix of [Color] instances onto the pixels of an image
     unittest
     {
         Bitmap img = new Bitmap(10, 20, PixelFormat.Format32bppRgba);
@@ -4649,7 +4695,7 @@ private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[]
     }
 
     /**
-     * Counts the amount of times a color appears in the image.
+     * Counts the amount of times each color appears in the image.
      *
      * Returns:
      *     An associative array of the amount of times each color appears in the image.
@@ -4665,6 +4711,7 @@ private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[]
         return counts;
     }
 
+    /// Counting the number of times each color appears in an image
     unittest
     {
         Bitmap img = new Bitmap(5, 5, PixelFormat.Format32bppRgba);
@@ -4694,6 +4741,7 @@ private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[]
         img.setPixel(3, 4, Color(255, 255, 255, 0));
         img.setPixel(4, 4, Color(255, 255, 255, 0));
         size_t[Color] counts = img.counts();
+        // See: https://forum.dlang.org/post/fmzxhrqyxuactuhwskgx@forum.dlang.org
         assert(counts[Color(255, 0, 0)] == 10);
         assert(counts[Color(0, 255, 0)] == 1);
         assert(counts[Color(0, 0, 255)] == 1);
@@ -4753,6 +4801,7 @@ private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[]
         return counts;
     }
 
+    /// Counting the amount of times each color index appears in an image which uses an indexed pixel format
     unittest
     {
         Bitmap img = new Bitmap(3, 3, PixelFormat.Format1bppIndexed, [
