@@ -13,7 +13,7 @@
  */
 module imaging.files.bmp;
 
-import imaging : Bitmap, bpp, Color, indexed, minStride, PixelFormat;
+import imaging : Bitmap, bpp, Color, getPixelDataSize, indexed, pixelDataAlloc, PixelFormat;
 import imaging.files : ImageFormat, ImageInfo, ImageLoader, leConv, LoadState, SingleImageFormat;
 import std.algorithm.comparison : among, min;
 import std.algorithm.mutation : swapRanges;
@@ -1071,37 +1071,9 @@ public final class BmpLoader : ImageLoader
             this._state = LoadState.End;
             return image;
         }
-        void[] data;
-        size_t dStride = minStride(0, this._info.width, this._info.pixelFormat.bpp);
-        final switch (this._bitCount)
-        {
-        case 1:
-            data = new ubyte[dStride * this._info.height];
-            break;
-        case 2, 4:
-            data = new ubyte[dStride * this._info.height];
-            break;
-        case 8:
-            data = new ubyte[dStride * this._info.height];
-            break;
-        case 16:
-            if (this._info.pixelFormat.bpp > 16)
-            {
-                goto case;
-            }
-            data = new ushort[this._info.width * this._info.height];
-            break;
-        case 24, 32:
-            if (this._info.pixelFormat.bpp == 32)
-            {
-                data = new uint[this._info.width * this._info.height];
-            }
-            else
-            {
-                data = new ubyte[dStride * this._info.height];
-            }
-            break;
-        }
+        ulong dStride;
+        void[] data = pixelDataAlloc(this._info.width, this._info.height,
+                this._info.pixelFormat, dStride);
         switch (this._compression)
         {
         case Compression.BI_RGB, Compression.BI_BITFIELDS:
@@ -1777,7 +1749,8 @@ public final class BmpFormat : SingleImageFormat
             fp.rawWrite([bV5Header]);
         }
         ubyte[] row = new ubyte[fStride];
-        size_t rowDataSize = minStride(0, bmp.width, format.bpp);
+        ulong rowDataSize;
+        getPixelDataSize(bmp.width, bmp.height, format, rowDataSize);
         row[rowDataSize .. $] = 0;
         foreach (int y; bmp.yBottomUp)
         {

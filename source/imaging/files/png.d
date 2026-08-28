@@ -12,7 +12,7 @@
  */
 module imaging.files.png;
 
-import imaging : Bitmap, bpp, Color, indexed, PixelFormat, Rectangle;
+import imaging : Bitmap, bpp, Color, indexed, pixelDataAlloc, PixelFormat, Rectangle;
 import imaging.files : beConv, ImageFormat, ImageInfo, ImageLoader, LoadState, SingleImageFormat;
 import std.math.algebraic : abs;
 import std.algorithm.comparison : among;
@@ -1156,23 +1156,8 @@ package(imaging.files) struct BasePngLoader(bool Animated)
             this._rawData = null;
         }
         assert(unfilteredData.length == (rowSize + 1) * height);
-        void[] data;
-        final switch (pixelFormat.bpp)
-        {
-        case 1, 4:
-            data = new ubyte[(width * pixelFormat.bpp + 7) / 8 * height];
-            break;
-        case 8:
-            data = new ubyte[width * height];
-            break;
-        case 24:
-            data = new ubyte[width * height * 3];
-            break;
-        case 32:
-            data = new uint[width * height];
-            break;
-        }
-        size_t dStride = (width * pixelFormat.bpp + 7) / 8;
+        size_t dStride;
+        void[] data = pixelDataAlloc(width, height, pixelFormat, dStride);
         final switch (this._colorType)
         {
         case ColorType.GrayscaleAlpha:

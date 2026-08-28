@@ -7,7 +7,7 @@
  */
 module imaging.files;
 
-import imaging : Bitmap, bpp, minStride, PixelFormat;
+import imaging : alignSize, Bitmap, bpp, getPixelDataSize, pixelDataAlloc, PixelFormat;
 import imaging.extra : Animation;
 import imaging.files.apng : ApngFormat;
 import imaging.files.bmp : BmpFormat;
@@ -94,6 +94,21 @@ public struct ImageInfo
     PixelFormat pixelFormat;
 
     /**
+     * Computes the minimum stride of the pixel data of an image with the width, height and pixel format specified in this instance.
+     * [width] and [height] must both be greater than 0.
+     *
+     * Returns: The stride of the pixel data of an image with the properties specified in this instance.
+     */
+    @nogc @safe public pure ulong stride() nothrow return
+    in (this.width > 0 && this.height > 0)
+    out (result; stride % this.pixelFormat.alignSize == 0)
+    {
+        ulong stride;
+        getPixelDataSize(this.width, this.height, this.pixelFormat, stride);
+        return stride;
+    }
+
+    /**
      * Computes the minimum size of the pixel data of an image with the width, height and pixel format specified in this instance.
      * [width] and [height] must both be greater than 0.
      *
@@ -104,9 +119,7 @@ public struct ImageInfo
     @nogc @safe public pure ulong size() nothrow return
     in (this.width > 0 && this.height > 0)
     {
-        ulong stride = minStride(0, this.width, this.pixelFormat.bpp);
-        assert(stride != 0);
-        return stride * height;
+        return getPixelDataSize(this.width, this.height, this.pixelFormat);
     }
 }
 
@@ -206,7 +219,10 @@ public interface ImageLoader
             assert(this.state == LoadState.BeforeInfo || this.state == LoadState.End);
             assert(result.valid());
             assert(result.skipX == 0);
-            assert(result.stride == minStride(0, result.width, result.pixelFormat.bpp));
+            ulong stride;
+            ulong size = getPixelDataSize(result.width, result.height, result.pixelFormat, stride);
+            assert(result.stride == stride);
+            assert(result.data.length == size);
         }
     }
 

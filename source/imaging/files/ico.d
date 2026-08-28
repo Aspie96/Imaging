@@ -17,7 +17,7 @@
  */
 module imaging.files.ico;
 
-import imaging : Bitmap, bpp, Color, indexed, minStride, PixelFormat;
+import imaging : Bitmap, bpp, Color, indexed, pixelDataAlloc, PixelFormat;
 import imaging.files : ImageFormat, ImageInfo, ImageLoader, leConv, LoadState, MultiImageFormat;
 import imaging.files.png : pngSignature;
 import std.algorithm.comparison : among;
@@ -682,8 +682,8 @@ public final class IcoLoader : ImageLoader
             if (createData)
             {
                 assert(transparentIndex != -1);
-                size_t dStride = minStride(0, width, pixelFormat.bpp);
-                data = new ubyte[dStride * height];
+                size_t dStride;
+                data = pixelDataAlloc(width, height, pixelFormat, dStride);
                 for (int y = 0; y < height; y++)
                 {
                     for (int x = 0; x < width; x++)

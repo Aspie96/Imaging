@@ -981,43 +981,133 @@ private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[]
 
 // If possible, computes an arithmetically correct ((skipX + width) * pixelFormat.bpp + 7) / 8.
 // Using that expression alone may produce incorrect results due to intermediate values exceding the maximum of their type.
-// If the final result does not fit in a size_t value, 0 is returned.
-@nogc @safe package(imaging) pure size_t minStride(size_t skipX, int width, int bpp) nothrow
+// If the final result does not fit in a size_t value, false is asserted.
+@nogc @safe private pure size_t minStride(size_t skipX, int width, int bpp) nothrow
 {
     if (bpp < 8)
     {
         size_t stride1 = (skipX >> 3) * bpp;
-        if (stride1 % bpp != 0 || stride1 / bpp != (skipX >> 3))
-        {
-            return 0;
-        }
+        assert(stride1 % bpp == 0 && stride1 / bpp == (skipX >> 3));
         size_t stride2 = (width >> 3) * bpp;
-        if (stride2 % bpp != 0 || stride2 / bpp != (width >> 3))
-        {
-            return 0;
-        }
+        assert(stride2 % bpp == 0 && stride2 / bpp == (width >> 3));
         int r1 = skipX & 0b111;
         int r2 = width & 0b111;
         int stride3 = ((r1 + r2) * bpp + 7) >> 3;
-        if (stride2 > size_t.max - stride1 || stride3 > size_t.max - (stride1 + stride2))
-        {
-            return 0;
-        }
+        assert(stride2 <= size_t.max - stride1 && stride3 <= size_t.max - (stride1 + stride2));
         size_t stride = stride1 + stride2 + stride3;
         return stride;
     }
     int bytesPerPixel = bpp >> 3;
-    if (width > size_t.max - skipX)
-    {
-        return 0;
-    }
+    assert(width <= size_t.max - skipX);
     size_t values = skipX + width;
     size_t stride = values * bytesPerPixel;
-    if (stride % bytesPerPixel != 0 || stride / bytesPerPixel != values)
-    {
-        return 0;
-    }
+    assert(stride % bytesPerPixel == 0 && stride / bytesPerPixel == values);
     return stride;
+}
+
+/**
+ * Computes the minimum size for the pixel data of an image with the given width, height and pixel format.
+ *
+ * Params:
+ *     width = The width of the image, in pixel. It must be greater than 0.
+ *     height = The height of the image, in pixel. It must be greater than 0.
+ *     pixelFormat = The pixel format for the image.
+ *     stride = If provided, it is set to the stride of the image, which is kept to the minimum.
+ *
+ * Returns: The minimum size for the pixel data of the image.
+ */
+@nogc @safe public pure ulong getPixelDataSize(int width, int height,
+        PixelFormat pixelFormat, out ulong stride) nothrow
+in (width > 0 && height > 0)
+out (; stride % pixelFormat.alignSize == 0)
+{
+    stride = ((cast(ulong) width) * pixelFormat.bpp + 7) >> 3;
+    return stride * height;
+}
+
+/// ditto
+@nogc @safe public pure ulong getPixelDataSize(int width, int height, PixelFormat pixelFormat) nothrow
+in (width > 0 && height > 0)
+{
+    ulong stride;
+    return getPixelDataSize(width, height, pixelFormat, stride);
+}
+
+/// Computing the minimum size for the pixel data of an image with the given width, height and pixel format
+unittest
+{
+    assert(getPixelDataSize(10, 10, PixelFormat.Format1bppIndexed) == 20);
+    assert(getPixelDataSize(10, 10, PixelFormat.Format4bppIndexed) == 50);
+    assert(getPixelDataSize(10, 10, PixelFormat.Format8bppIndexed) == 100);
+    assert(getPixelDataSize(10, 10, PixelFormat.Format16bppRgb555) == 200);
+    assert(getPixelDataSize(10, 10, PixelFormat.Format32bppRgba) == 400);
+}
+
+/**
+ * Allocates aligned pixel data for the an image with the given width, height and pixel format.
+ *
+ * Params:
+ *     width = The width of the image, in pixel. It must be greater than 0.
+ *     height = The height of the image, in pixel. It must be greater than 0.
+ *     pixelFormat = The pixel format of the image.
+ *     stride =
+ *         If provided, it is set to the stride of the image, which is kept to the minimum.
+ *         If an out of memory error occours during allocation, then it is left in an indeterminate state.
+ *
+ * Returns: The allocated memory-aligned data.
+ */
+@safe public void[] pixelDataAlloc(int width, int height, PixelFormat pixelFormat, out size_t stride) nothrow
+in (width > 0 && height > 0)
+out (result)
+{
+    ulong ulStride;
+    ulong size = getPixelDataSize(width, height, pixelFormat, ulStride);
+    assert(stride == ulStride);
+    assert(stride % pixelFormat.alignSize == 0);
+    assert(result != null);
+    assert(result.length == size);
+    assert((cast(size_t)&(result[0])) % pixelFormat.alignSize == 0);
+}
+do
+{
+    stride = ((cast(size_t) width) * pixelFormat.bpp + 7) >> 3;
+    final switch (pixelFormat.bpp)
+    {
+    case 1, 4, 8:
+        return new ubyte[(cast(ulong) stride) * height];
+    case 16:
+        return new ushort[(cast(ulong) width) * height];
+    case 24:
+        return new ubyte[(cast(ulong) stride) * height];
+    case 32:
+        return new uint[(cast(ulong) width) * height];
+    }
+}
+
+/// ditto
+public @safe void[] pixelDataAlloc(int width, int height, PixelFormat pixelFormat) nothrow
+in (width > 0 && height > 0)
+out (result)
+{
+    ulong size = getPixelDataSize(width, height, pixelFormat);
+    assert(result != null);
+    assert(result.length == size);
+    assert((cast(size_t)&(result[0])) % pixelFormat.alignSize == 0);
+}
+do
+{
+    size_t stride;
+    return pixelDataAlloc(width, height, pixelFormat, stride);
+}
+
+/// Allocating aligned pixel data for the an image with the given width, height and pixel format
+unittest
+{
+    assert(pixelDataAlloc(10, 10, PixelFormat.Format1bppIndexed).length == 20);
+    assert(pixelDataAlloc(10, 10, PixelFormat.Format4bppIndexed).length == 50);
+    assert(pixelDataAlloc(10, 10, PixelFormat.Format8bppIndexed).length == 100);
+    assert(pixelDataAlloc(10, 10, PixelFormat.Format16bppRgb555).length == 200);
+    assert(pixelDataAlloc(10, 10, PixelFormat.Format32bppRgba).length == 400);
 }
 
 /**
@@ -1065,8 +1155,10 @@ private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[]
         assert(this.width == width);
         assert(this.height == height);
         assert(this.skipX == 0);
-        size_t mStride = minStride(skipX, width, pixelFormat.bpp);
-        assert(mStride != 0 && this.stride == mStride);
+        ulong stride;
+        ulong size = getPixelDataSize(width, height, pixelFormat, stride);
+        assert(this.stride == stride);
+        assert(this.data.length == size);
         assert(this.pixelFormat == pixelFormat);
         if (pixelFormat.indexed)
         {
@@ -1079,32 +1171,9 @@ private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[]
     }
     do
     {
-        this._width = width;
-        this._height = height;
-        this._skipX = 0;
-        if (pixelFormat.bpp <= 8)
-        {
-            this._stride = cast(size_t)(((cast(ulong) width) * pixelFormat.bpp + 7) / 8);
-            this._data = new ubyte[this._stride * height];
-        }
-        else if (pixelFormat.bpp == 16)
-        {
-            this._stride = width * 2;
-            this._data = cast(ubyte[]) cast(void[]) new ushort[width * height];
-        }
-        else if (pixelFormat.bpp == 24)
-        {
-            this._stride = width * 3;
-            this._data = new ubyte[this._stride * height];
-        }
-        else if (pixelFormat.bpp == 32)
-        {
-            this._stride = width * 4;
-            this._data = cast(ubyte[]) cast(void[]) new uint[width * height];
-        }
-        this._palette = palette;
-        this._bottomUp = false;
-        this._pixelFormat = pixelFormat;
+        size_t stride;
+        void[] data = pixelDataAlloc(width, height, pixelFormat, stride);
+        this(width, height, 0, stride, pixelFormat, palette, false, data);
     }
 
     /// Creating a [Bitmap] instance with a gien indexed format and, if required, a palette
