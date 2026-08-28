@@ -315,7 +315,6 @@ public final class ApngFormat : AnimatedImageFormat
         fp.rawWrite(pngSignature);
         ColorType colorType;
         immutable(Color)[] palette;
-        int secondIndex = staticImage is null;
         const Bitmap firstImage = staticImage is null ? anim.frames[0] : staticImage;
         switch (firstImage.pixelFormat)
         {
@@ -335,78 +334,81 @@ public final class ApngFormat : AnimatedImageFormat
             colorType = ColorType.RgbTriple;
             break;
         }
-        for (int i = secondIndex; i < anim.frames.length; i++)
+        foreach (size_t i, const Bitmap frame; anim.frames)
         {
-            switch (anim.frames[i].pixelFormat)
+            if (staticImage !is null || i > 0)
             {
-            case PixelFormat.Format1bppIndexed, PixelFormat.Format4bppIndexed, PixelFormat.Format8bppIndexed:
-                if (colorType == ColorType.Indexed && anim.frames[i].palette != palette)
+                switch (frame.pixelFormat)
                 {
-                    if (all!(c => c.a == 255)(anim.frames[i].palette)
-                            && all!(c => c.a == 255)(palette))
+                case PixelFormat.Format1bppIndexed, PixelFormat.Format4bppIndexed,
+                        PixelFormat.Format8bppIndexed:
+                        if (colorType == ColorType.Indexed && frame.palette != palette)
                     {
-                        colorType = ColorType.RgbTriple;
-                    }
-                    else
-                    {
-                        colorType = ColorType.Rgba;
-                    }
-                }
-                else if (colorType == ColorType.Grayscale)
-                {
-                    if (all!(c => c.a == 255)(anim.frames[i].palette))
-                    {
-                        if (!all!(c => (c.r == c.g && c.g == c.b))(anim.frames[i].palette))
+                        if (all!(c => c.a == 255)(frame.palette) && all!(c => c.a == 255)(palette))
                         {
                             colorType = ColorType.RgbTriple;
-                        }
-                    }
-                    else
-                    {
-                        colorType = ColorType.Rgba;
-                    }
-                }
-                else if (colorType == ColorType.RgbTriple
-                        && !all!(c => c.a == 255)(anim.frames[i].palette))
-                {
-                    colorType = ColorType.Rgba;
-                }
-                break;
-            case PixelFormat.Format8bppGray:
-                if (colorType == ColorType.Indexed)
-                {
-                    if (all!(c => c.a == 255)(palette))
-                    {
-                        if (all!(c => (c.r == c.g && c.g == c.b))(palette))
-                        {
-                            colorType = ColorType.Grayscale;
                         }
                         else
                         {
-                            colorType = ColorType.RgbTriple;
+                            colorType = ColorType.Rgba;
                         }
                     }
-                    else
+            else if (colorType == ColorType.Grayscale)
+                    {
+                        if (all!(c => c.a == 255)(frame.palette))
+                        {
+                            if (!all!(c => (c.r == c.g && c.g == c.b))(frame.palette))
+                            {
+                                colorType = ColorType.RgbTriple;
+                            }
+                        }
+                        else
+                        {
+                            colorType = ColorType.Rgba;
+                        }
+                    }
+                    else if (colorType == ColorType.RgbTriple
+                            && !all!(c => c.a == 255)(frame.palette))
                     {
                         colorType = ColorType.Rgba;
                     }
+                    break;
+                case PixelFormat.Format8bppGray:
+                    if (colorType == ColorType.Indexed)
+                    {
+                        if (all!(c => c.a == 255)(palette))
+                        {
+                            if (all!(c => (c.r == c.g && c.g == c.b))(palette))
+                            {
+                                colorType = ColorType.Grayscale;
+                            }
+                            else
+                            {
+                                colorType = ColorType.RgbTriple;
+                            }
+                        }
+                        else
+                        {
+                            colorType = ColorType.Rgba;
+                        }
+                    }
+                    break;
+                case PixelFormat.Format32bppArgbBE, PixelFormat.Format32bppArgbLE,
+                        PixelFormat.Format32bppRgbaBE,
+                        PixelFormat.Format32bppRgbaLE:
+                        colorType = ColorType.Rgba;
+                    break;
+                default:
+                    if (colorType == ColorType.Indexed && !all!(c => c.a == 255)(palette))
+                    {
+                        colorType = ColorType.Rgba;
+                    }
+                    else
+                    {
+                        colorType = ColorType.RgbTriple;
+                    }
+                    break;
                 }
-                break;
-            case PixelFormat.Format32bppArgbBE, PixelFormat.Format32bppArgbLE,
-                    PixelFormat.Format32bppRgbaBE,
-                    PixelFormat.Format32bppRgbaLE:
-                    colorType = ColorType.Rgba;
-                break;
-            default:
-                if (colorType == ColorType.Indexed && !all!(c => c.a == 255)(palette))
-                {
-                    colorType = ColorType.Rgba;
-                }
-                else
-                {
-                    colorType = ColorType.RgbTriple;
-                }
-                break;
             }
         }
         ubyte bitDepth;
@@ -478,52 +480,62 @@ public final class ApngFormat : AnimatedImageFormat
         }
         ubyte[] dIDAT = compress(data);
         writeChunk(fp, "IDAT", dIDAT);
-        for (size_t i = staticImage is null; i < anim.length; i++)
+        Bitmap prevImg = cast(Bitmap) staticImage;
+        foreach (size_t i, const Bitmap frame; anim.frames)
         {
-            int xMin = int.max;
-            int yMin = int.max;
-            int xMax = -1;
-            int yMax = -1;
-            const Bitmap prevImg = i == 0 ? staticImage : anim.frames[i - 1];
-            for (int y = 0; y < anim.height; y++)
+            if (staticImage !is null || i > 0)
             {
-                auto r1 = prevImg.scanLine(prevImg.yTopDown[y]);
-                auto r2 = anim.frames[i].scanLine(anim.frames[i].yTopDown[y]);
-                for (int x = 0; x < anim.width; x++)
+                int xMin = int.max;
+                int yMin = int.max;
+                int xMax = -1;
+                int yMax = -1;
+                assert(prevImg !is null);
+                for (int y = 0; y < frame.height; y++)
                 {
-                    if (r1[x] != r2[x])
+                    auto r1 = prevImg.scanLine(prevImg.yTopDown[y]);
+                    auto r2 = frame.scanLine(frame.yTopDown[y]);
+                    for (int x = 0; x < frame.width; x++)
                     {
-                        xMin = min(x, xMin);
-                        xMax = max(x, xMax);
-                        yMin = min(y, yMin);
-                        yMax = max(y, yMax);
+                        if (r1[x] != r2[x])
+                        {
+                            xMin = min(x, xMin);
+                            xMax = max(x, xMax);
+                            yMin = min(y, yMin);
+                            yMax = max(y, yMax);
+                        }
                     }
                 }
+                Rectangle rect;
+                if (xMax == -1)
+                {
+                    rect = Rectangle(0, 0, 1, 1);
+                }
+                else
+                {
+                    rect = Rectangle(xMin, yMin, xMax - xMin + 1, yMax - yMin + 1);
+                }
+                //Rectangle rect = Rectangle(0, 0, anim.width, anim.height);
+                numDen(anim.durations[i], delayNum, delayDen);
+                Data_fcTL d_fcTL = Data_fcTL(sequenceNumber++, rect.width,
+                        rect.height, rect.x, rect.y, delayNum, delayDen,
+                        DisposeOp.APNG_DISPOSE_OP_NONE, BlendOp.APNG_BLEND_OP_SOURCE);
+                writeChunk(fp, "fcTL", d_fcTL);
+                const Bitmap subFrame = frame.slice(rect);
+                data = encode(subFrame, colorType, bitDepth);
+                ubyte[] frameData = compress(data);
+                ubyte[4] sequenceNumberBe = [
+                    sequenceNumber >> 24, sequenceNumber >> 16 & 0xFF,
+                    sequenceNumber >> 8 & 0xFF, sequenceNumber & 0xFF,
+                ];
+                sequenceNumber++;
+                ubyte[] dfdAT = sequenceNumberBe ~ frameData;
+                writeChunk(fp, "fdAT", dfdAT);
             }
-            Rectangle rect;
-            if (xMax == -1)
-            {
-                rect = Rectangle(0, 0, 1, 1);
-            }
-            else
-            {
-                rect = Rectangle(xMin, yMin, xMax - xMin + 1, yMax - yMin + 1);
-            }
-            //Rectangle rect = Rectangle(0, 0, anim.width, anim.height);
-            numDen(anim.durations[i], delayNum, delayDen);
-            Data_fcTL d_fcTL = Data_fcTL(sequenceNumber++, rect.width, rect.height, rect.x, rect.y, delayNum,
-                    delayDen, DisposeOp.APNG_DISPOSE_OP_NONE, BlendOp.APNG_BLEND_OP_SOURCE);
-            writeChunk(fp, "fcTL", d_fcTL);
-            const Bitmap subFrame = anim.frames[i].slice(rect);
-            data = encode(subFrame, colorType, bitDepth);
-            ubyte[] frameData = compress(data);
-            ubyte[4] sequenceNumberBe = [
-                sequenceNumber >> 24, sequenceNumber >> 16 & 0xFF,
-                sequenceNumber >> 8 & 0xFF, sequenceNumber & 0xFF,
-            ];
-            sequenceNumber++;
-            ubyte[] dfdAT = sequenceNumberBe ~ frameData;
-            writeChunk(fp, "fdAT", dfdAT);
+            prevImg = cast(Bitmap) frame;
+        }
+        for (size_t i = staticImage is null; i < anim.length; i++)
+        {
+
         }
         writeChunk(fp, "IEND", []);
     }

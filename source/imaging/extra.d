@@ -11,12 +11,107 @@ import imaging : Bitmap;
 import std.algorithm.iteration : sum;
 import std.algorithm.searching : all;
 
+private struct FramesRange
+{
+    private Bitmap[] _frames;
+
+    private @nogc @trusted this(Bitmap[] frames)
+    in
+    {
+        assert(frames.length > 0);
+        assert(all!(bmp => bmp !is null)(frames));
+        assert(all!(bmp => bmp.width == frames[0].width && bmp.height == frames[0].height)(frames));
+    }
+    do
+    {
+        this._frames = frames;
+    }
+
+    public int opApply(scope int delegate(Bitmap frame) dg)
+    {
+        for (size_t i = 0; i < this._frames.length; i++)
+        {
+            int result = dg(this._frames[i]);
+            if (result != 0)
+            {
+                return result;
+            }
+        }
+        return 0;
+    }
+
+    public int opApply(scope int delegate(const Bitmap frame) dg) const
+    {
+        for (size_t i = 0; i < this._frames.length; i++)
+        {
+            int result = dg(this._frames[i]);
+            if (result != 0)
+            {
+                return result;
+            }
+        }
+        return 0;
+    }
+
+    public int opApply(scope int delegate(size_t i, Bitmap frame) dg)
+    {
+        for (size_t i = 0; i < this._frames.length; i++)
+        {
+            int result = dg(i, this._frames[i]);
+            if (result != 0)
+            {
+                return result;
+            }
+        }
+        return 0;
+    }
+
+    public int opApply(scope int delegate(size_t i, ref const Bitmap frame) dg) const
+    {
+        for (size_t i = 0; i < this._frames.length; i++)
+        {
+            int result = dg(i, this._frames[i]);
+            if (result != 0)
+            {
+                return result;
+            }
+        }
+        return 0;
+    }
+
+    @nogc @trusted public inout(Bitmap) opIndex(size_t i) inout nothrow
+    in
+    {
+        assert(i < this.length);
+    }
+    do
+    {
+        return this._frames[i];
+    }
+
+    /// The number of frames in the range.
+    public @nogc @property @safe pure size_t length() const nothrow
+    {
+        return this._frames.length;
+    }
+
+    public alias opDollar = length;
+
+    invariant
+    {
+        assert(this._frames.length > 0);
+        assert(all!(bmp => bmp !is null)(this._frames));
+        assert(all!(bmp => bmp.width == this._frames[0].width && bmp.height
+                == this._frames[0].height)(this._frames));
+    }
+}
+
 /**
  * Represents a frame-based animation.
  */
 public class Animation
 {
-    private Bitmap[] _frames;
+    private FramesRange _frames;
     private double[] _durations;
     private int _plays;
 
@@ -42,11 +137,11 @@ public class Animation
         assert(frames.length > 0);
         assert(durations.length == frames.length);
         assert(all!(bmp => bmp !is null)(frames));
-        assert(all!(d => d >= 0)(durations));
+        assert(all!(bmp => bmp.width == frames[0].width && bmp.height == frames[0].height)(frames));
     }
     do
     {
-        this._frames = frames.dup;
+        this._frames = FramesRange(frames);
         this._durations = durations.dup;
         this._plays = plays;
     }
@@ -54,17 +149,17 @@ public class Animation
     /// The width of the frames in the animation.
     @nogc @property @safe public pure int width() const nothrow
     {
-        return this._frames[0].width;
+        return this._frames._frames[0].width;
     }
 
     /// The height of the frames in the animation.
     @nogc @property @safe public pure int height() const nothrow
     {
-        return this._frames[0].height;
+        return this.frames._frames[0].height;
     }
 
-    /// The frames in the animation.
-    @nogc @property @safe public inout(Bitmap[]) frames() inout nothrow
+    /// Range of frames in the animation.
+    @nogc @property @safe public auto frames() inout nothrow
     {
         return this._frames;
     }
@@ -84,7 +179,7 @@ public class Animation
     /// The amount of frames in the animation.
     @nogc @property @safe public pure size_t length() const nothrow
     {
-        return this._frames.length;
+        return this.frames.length;
     }
 
     /// The amount of times the animation is played.
@@ -109,13 +204,16 @@ public class Animation
      */
     @nogc @safe public bool valid() const nothrow
     {
-        return all!(d => d >= 0)(this.durations) && all!(bmp => bmp.valid)(this._frames);
+        return all!(d => d >= 0)(this.durations) && all!(bmp => bmp.valid)(this.frames._frames);
     }
 
     invariant
     {
         assert(this._frames.length > 0);
         assert(this._durations.length == this._frames.length);
-        assert(all!(bmp => bmp !is null)(this._frames));
+        assert(this._frames._frames.length > 0);
+        assert(all!(bmp => bmp !is null)(this._frames._frames));
+        assert(all!(bmp => bmp.width == this._frames._frames[0].width
+                && bmp.height == this._frames._frames[0].height)(this._frames._frames));
     }
 }
