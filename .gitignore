@@ -8,5 +8,6 @@
 /docs.json
 /.dub
 /docs
-/examples/images
 /examples/*.bmp
+/examples/images
+/examples/tmp.*
