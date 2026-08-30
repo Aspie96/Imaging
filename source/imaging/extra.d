@@ -146,6 +146,50 @@ public class Animation
         this._plays = plays;
     }
 
+    /// Creating an animation from its frames
+    unittest
+    {
+        import imaging : PixelFormat;
+        import std.math.algebraic : abs;
+
+        Bitmap[3] frames;
+        frames[0] = new Bitmap(3, 3, PixelFormat.Format32bppRgba);
+        frames[1] = new Bitmap(3, 3, PixelFormat.Format32bppArgb);
+        frames[2] = new Bitmap(3, 3, PixelFormat.Format24bppRgb);
+        Animation anim = new Animation(frames, [0.1, 0.1, 0.1]);
+        assert(anim.width == 3);
+        assert(anim.height == 3);
+        assert(anim.durations == [0.1, 0.1, 0.1]);
+        assert(abs(anim.totalDuration - 0.3) < 0.0001);
+        assert(anim.length == 3);
+        assert(anim.plays == 0);
+        anim.plays = 2;
+        assert(anim.plays == 2);
+        foreach (Bitmap frame; anim.frames)
+        {
+            assert(frame.width == 3);
+            assert(frame.height == 3);
+        }
+        foreach (Bitmap frame; anim.frames)
+        {
+            assert(frame.width == 3);
+            assert(frame.height == 3);
+            break;
+        }
+        foreach (size_t i, Bitmap frame; anim.frames)
+        {
+            assert(frame == frames[i]);
+        }
+        foreach (size_t i, Bitmap frame; anim.frames)
+        {
+            assert(frame == frames[i]);
+            if (i > 1)
+            {
+                break;
+            }
+        }
+    }
+
     /// The width of the frames in the animation.
     @nogc @property @safe public pure int width() const nothrow
     {
@@ -205,6 +249,25 @@ public class Animation
     @nogc @safe public bool valid() const nothrow
     {
         return all!(d => d >= 0)(this.durations) && all!(bmp => bmp.valid)(this.frames._frames);
+    }
+
+    /// Checking whether an animation is valid
+    unittest
+    {
+        import imaging : Color, PixelFormat;
+
+        Bitmap[3] frames;
+        frames[0] = new Bitmap(3, 3, PixelFormat.Format32bppRgba);
+        frames[1] = new Bitmap(3, 3, PixelFormat.Format32bppArgb);
+        frames[2] = new Bitmap(3, 3, PixelFormat.Format8bppIndexed, [
+            Color.black, Color.white
+        ]);
+        frames[2].paint(Color.black);
+        Animation anim = new Animation(frames, [0.1, 0.1, 0.1]);
+        assert(anim.valid());
+        anim.frames[2].paint(Color.white);
+        anim.frames[2].palette = [Color.black];
+        assert(!anim.valid());
     }
 
     invariant
