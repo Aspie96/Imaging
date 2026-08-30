@@ -2,13 +2,13 @@
  * This module provides a codec for the Quite Ok Image Format.
  *
  * See_Also:
- *     https://qoiformat.org/,
- *     https://phoboslab.org/log/2021/11/qoi-fast-lossless-image-compression,
- *     https://phoboslab.org/log/2021/12/qoi-specification
+ *     [The Quite OK Image Format for Fast, Lossless Compression](https://qoiformat.org/),
+ *     [Lossless Image Compression in O(n) Time](https://phoboslab.org/log/2021/11/qoi-fast-lossless-image-compression),
+ *     [The QOI File Format Specification](https://phoboslab.org/log/2021/12/qoi-specification)
  *
  * Copyright: Copyright (C) 2026 Valentino Giudice
  * License: BSL-1.0
- * Authors: Valentino Giudice, https://www.functorfault.net/
+ * Authors: [Valentino Giudice](https://www.functorfault.net/)
  */
 module imaging.files.qoi;
 

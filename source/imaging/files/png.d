@@ -2,13 +2,13 @@
  * This module provides a codec for the Portable Network Graphics format.
  *
  * See_Also:
- *     https://www.libpng.org/pub/png/,
- *     https://www.w3.org/TR/png/,
- *     https://www.zlib.net/
+ *     [Portable Network Graphics](https://www.libpng.org/pub/png/),
+ *     [Portable Network Graphics (PNG) Specification](https://www.w3.org/TR/png/),
+ *     [zlib](https://www.zlib.net/)
  *
  * Copyright: Copyright (C) 2026 Valentino Giudice
  * License: BSL-1.0
- * Authors: Valentino Giudice, https://www.functorfault.net/
+ * Authors: [Valentino Giudice](https://www.functorfault.net/)
  */
 module imaging.files.png;
 

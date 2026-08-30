@@ -2,18 +2,18 @@
  * This module provides a codec for the Icon Format.
  *
  * See_Also:
- *     https://learn.microsoft.com/windows/win32/wic/ico-format-overview,
- *     https://learn.microsoft.com/previous-versions/ms997538(v=msdn.10),
- *     https://devblogs.microsoft.com/oldnewthing/20101018-00/?p=12513,
- *     https://devblogs.microsoft.com/oldnewthing/20101019-00/?p=12503,
- *     https://devblogs.microsoft.com/oldnewthing/20101021-00/?p=12483,
- *     https://devblogs.microsoft.com/oldnewthing/20101022-00/?p=12473,
- *     https://devblogs.microsoft.com/oldnewthing/20120720-00/?p=7083,
- *     https://devblogs.microsoft.com/oldnewthing/20231025-00/?p=108925
+ *     [ICO Format Overview](https://learn.microsoft.com/windows/win32/wic/ico-format-overview),
+ *     [Icons](https://learn.microsoft.com/previous-versions/ms997538(v=msdn.10)),
+ *     [The evolution of the ICO file format, part 1: Monochrome beginnings](https://devblogs.microsoft.com/oldnewthing/20101018-00/?p=12513),
+ *     [The evolution of the ICO file format, part 2: Now in color!](https://devblogs.microsoft.com/oldnewthing/20101019-00/?p=12503),
+ *     [The evolution of the ICO file format, part 3: Alpha-blended images](https://devblogs.microsoft.com/oldnewthing/20101021-00/?p=12483),
+ *     [The evolution of the ICO file format, part 4: PNG images](https://devblogs.microsoft.com/oldnewthing/20101022-00/?p=12473),
+ *     [The format of icon resources](https://devblogs.microsoft.com/oldnewthing/20120720-00/?p=7083),
+ *     [The format of icon resources, revisited](https://devblogs.microsoft.com/oldnewthing/20231025-00/?p=108925)
  *
  * Copyright: Copyright (C) 2026 Valentino Giudice
  * License: BSL-1.0
- * Authors: Valentino Giudice, https://www.functorfault.net/
+ * Authors: [Valentino Giudice](https://www.functorfault.net/)
  */
 module imaging.files.ico;
 

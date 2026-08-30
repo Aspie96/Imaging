@@ -3,7 +3,7 @@
  *
  * Copyright: Copyright (C) 2026 Valentino Giudice
  * License: BSL-1.0
- * Authors: Valentino Giudice, https://www.functorfault.net/
+ * Authors: [Valentino Giudice](https://www.functorfault.net/)
  */
 module imaging.files;
 

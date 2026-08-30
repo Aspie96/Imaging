@@ -2,14 +2,14 @@
  * This module provides a codec for the Windows Bitmap Format for device-independent bitmaps.
  *
  * See_Also:
- *     https://learn.microsoft.com/openspecs/windows_protocols/ms-wmf/4813e7fd-52d0-4f42-965f-228c8b7488d2,
- *     https://learn.microsoft.com/previous-versions/ms969901(v=msdn.10),
- *     https://learn.microsoft.com/dotnet/desktop/winforms/advanced/types-of-bitmaps#bmp,
- *     https://learn.microsoft.com/windows/win32/wic/bmp-format-overview
+ *     [[MS-WMF]: Windows Metafile Format](https://learn.microsoft.com/openspecs/windows_protocols/ms-wmf/4813e7fd-52d0-4f42-965f-228c8b7488d2),
+ *     [DIBs and Their Use](https://learn.microsoft.com/previous-versions/ms969901(v=msdn.10)),
+ *     [BMP](https://learn.microsoft.com/dotnet/desktop/winforms/advanced/types-of-bitmaps#bmp),
+ *     [BMP Format Overview](https://learn.microsoft.com/windows/win32/wic/bmp-format-overview)
  *
  * Copyright: Copyright (C) 2026 Valentino Giudice
  * License: BSL-1.0
- * Authors: Valentino Giudice, https://www.functorfault.net/
+ * Authors: [Valentino Giudice](https://www.functorfault.net/)
  */
 module imaging.files.bmp;
 

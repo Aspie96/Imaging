@@ -2,12 +2,12 @@
  * This module provides a codec for the Animated PNG format.
  *
  * See_Also:
- *     https://wiki.mozilla.org/APNG_Specification,
- *     https://www.w3.org/TR/png/#apng-frame-based-animation
+ *     [APNG Specification](https://wiki.mozilla.org/APNG_Specification),
+ *     [APNG: frame-based animation](https://www.w3.org/TR/png/#apng-frame-based-animation)
  *
  * Copyright: Copyright (C) 2026 Valentino Giudice
  * License: BSL-1.0
- * Authors: Valentino Giudice, https://www.functorfault.net/
+ * Authors: [Valentino Giudice](https://www.functorfault.net/)
  */
 module imaging.files.apng;
 
