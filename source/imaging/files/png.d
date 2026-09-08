@@ -229,7 +229,7 @@ private size_t maxCompressedSize(size_t originalSize)
  *     `true` has been found to be animated.
  *     `false` otherwise.
  */
-public bool checkAnimated(File fp, bool afterSignature, int maxChunks = 1024)
+public bool checkAnimated(ref File fp, bool afterSignature, int maxChunks = 1024)
 {
     ulong s = fp.tell;
     if (!afterSignature)
@@ -350,7 +350,7 @@ package(imaging.files) struct BasePngLoader(bool Animated)
         }
     }
 
-    package(imaging.files) this(File fp, ImageFormat format, int maxChunks = 1024)
+    package(imaging.files) this(ref File fp, ImageFormat format, int maxChunks = 1024)
     {
         this._fp = fp;
         this._format = format;
@@ -1471,7 +1471,8 @@ public final class PngLoader : ImageLoader
      *         The maximum amount of chunks to be read from the file.
      *         If the file has more chunks, it will be deemed to be invalid.
      */
-    @trusted public this(File fp, int maxChunks = 1024)
+    /*@nogc*/
+    @trusted public this(ref File fp, int maxChunks = 1024) nothrow
     {
         this._loader = BasePngLoader!false(fp, PngFormat.instance(), maxChunks);
     }
@@ -1541,7 +1542,7 @@ public final class PngLoader : ImageLoader
     }
 }
 
-package(imaging.files) void writeChunk(T)(File fp, ChunkType type, T data)
+package(imaging.files) void writeChunk(T)(ref File fp, ChunkType type, T data)
 {
     static if (is(T : E[], E))
     {
@@ -1636,7 +1637,7 @@ public final class PngFormat : SingleImageFormat
 {
     private static PngFormat _instance;
 
-    @safe private pure this() nothrow
+    @nogc @safe private pure this() nothrow
     {
     }
 
@@ -1684,7 +1685,7 @@ public final class PngFormat : SingleImageFormat
      *
      * Returns: The created image loader.
      */
-    @safe public override PngLoader loader(File fp) const
+    @safe public override PngLoader loader(ref File fp) const nothrow
     {
         return new PngLoader(fp);
     }
@@ -1702,7 +1703,7 @@ public final class PngFormat : SingleImageFormat
      *         The image to be exported.
      *         It cannot be null.
      */
-    public override void save(File fp, const Bitmap bmp) const
+    public override void save(ref File fp, const Bitmap bmp) const
     in (bmp !is null)
     {
         enforce(bmp.valid());

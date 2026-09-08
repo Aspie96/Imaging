@@ -1,3 +1,4 @@
+*.a
 *.exe
 *.ilk
 *.lib
@@ -11,3 +12,4 @@
 /examples/*.bmp
 /examples/images
 /examples/tmp.*
+imaging-test-library

@@ -97,7 +97,7 @@ public final class ApngLoader : AnimatedImageLoader
      *         The maximum amount of chunks to be read from the file.
      *         If the file has more chunks, it will be deemed to be invalid.
      */
-    public this(File fp, int maxChunks = 1024)
+    public this(ref File fp, int maxChunks = 1024)
     {
         this._loader = BasePngLoader!true(fp, ApngFormat.instance(), maxChunks);
     }
@@ -225,7 +225,7 @@ public final class ApngFormat : AnimatedImageFormat
 {
     private static ApngFormat _instance;
 
-    @safe private pure this() nothrow
+    @nogc @safe private pure this() nothrow
     {
     }
 
@@ -273,7 +273,7 @@ public final class ApngFormat : AnimatedImageFormat
      *
      * Returns: The created loader.
      */
-    public override ApngLoader loader(File fp) const
+    public override ApngLoader loader(ref File fp) const
     {
         return new ApngLoader(fp);
     }
@@ -295,7 +295,7 @@ public final class ApngFormat : AnimatedImageFormat
      *         This may be null, in which case the first frame of the animation is used as the default static image.
      *         Defaults to `null`.
      */
-    public void save(File fp, const Animation anim, const Bitmap staticImage) const
+    public void save(ref File fp, const Animation anim, const Bitmap staticImage) const
     in
     {
         assert(anim !is null);
@@ -514,7 +514,6 @@ public final class ApngFormat : AnimatedImageFormat
                 {
                     rect = Rectangle(xMin, yMin, xMax - xMin + 1, yMax - yMin + 1);
                 }
-                //Rectangle rect = Rectangle(0, 0, anim.width, anim.height);
                 numDen(anim.durations[i], delayNum, delayDen);
                 Data_fcTL d_fcTL = Data_fcTL(sequenceNumber++, rect.width,
                         rect.height, rect.x, rect.y, delayNum, delayDen,
@@ -541,7 +540,7 @@ public final class ApngFormat : AnimatedImageFormat
     }
 
     /// ditto
-    public override void save(File fp, const Animation anim) const
+    public override void save(ref File fp, const Animation anim) const
     in (anim !is null)
     {
         this.save(fp, anim, null);

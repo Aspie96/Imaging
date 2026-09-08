@@ -49,7 +49,7 @@ public final class QoiLoader : ImageLoader
      *         The file pointer to be used.
      *         It must be open for binary read.
      */
-    @safe public this(File fp)
+    @nogc @safe public this(ref File fp) nothrow
     {
         this._fp = fp;
         this._state = LoadState.BeforeInfo;
@@ -370,7 +370,7 @@ public final class QoiFormat : SingleImageFormat
      *
      * Returns: The created image loader.
      */
-    @safe public override QoiLoader loader(File fp) const
+    @safe public override QoiLoader loader(ref File fp) const nothrow
     {
         return new QoiLoader(fp);
     }
@@ -392,7 +392,7 @@ public final class QoiFormat : SingleImageFormat
      *         It can be useful for testing purposes.
      *         It defaults to `false`.
      */
-    public void save(File fp, const Bitmap bmp, bool forceAlpha) const
+    public void save(ref File fp, const Bitmap bmp, bool forceAlpha) const
     in (bmp !is null)
     {
         enforce(bmp.valid());
@@ -496,7 +496,7 @@ public final class QoiFormat : SingleImageFormat
     }
 
     /// ditto
-    public override void save(File fp, const Bitmap bmp) const
+    public override void save(ref File fp, const Bitmap bmp) const
     in (bmp !is null)
     {
         this.save(fp, bmp, false);

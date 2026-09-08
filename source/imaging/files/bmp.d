@@ -286,7 +286,7 @@ public final class BmpLoader : ImageLoader
      *         The file pointer to be used.
      *         It must be open for binary read.
      */
-    @safe public this(File fp)
+    @nogc @safe public this(ref File fp) nothrow
     {
         this._state = LoadState.BeforeInfo;
         this._fp = fp;
@@ -1513,7 +1513,7 @@ public final class BmpFormat : SingleImageFormat
 {
     private static BmpFormat _instance = null;
 
-    @safe private pure this() nothrow
+    @nogc @safe private pure this() nothrow
     {
     }
 
@@ -1560,7 +1560,7 @@ public final class BmpFormat : SingleImageFormat
      *
      * Returns: The created image loader.
      */
-    @safe public override BmpLoader loader(File fp) const
+    @safe public override BmpLoader loader(ref File fp) const nothrow
     {
         return new BmpLoader(fp);
     }
@@ -1578,7 +1578,7 @@ public final class BmpFormat : SingleImageFormat
      *         The image to be exported.
      *         It cannot be null.
      */
-    public override void save(File fp, const Bitmap bmp) const
+    public override void save(ref File fp, const Bitmap bmp) const
     in (bmp !is null)
     {
         enforce(bmp.valid());

@@ -16,7 +16,10 @@ import imaging.files.png : checkAnimated, PngFormat, pngSignature;
 import imaging.files.qoi : QoiFormat;
 import std.algorithm.mutation : reverse;
 import std.algorithm.searching : all;
+import std.array : array;
+import std.range.primitives : isInfinite;
 import std.stdio : File, SEEK_CUR;
+import std.traits : ForeachType, isIterable;
 import std.typecons : Nullable;
 
 // Importing std.bitmanip.swapEndian would be better, but: https://github.com/dlang/dmd/issues/17923
@@ -157,7 +160,7 @@ public enum LoadState
 public interface ImageLoader
 {
     /// The image file format for this loader.
-    @property ImageFormat format() const nothrow
+    @property @safe ImageFormat format() const nothrow
     out (result; result !is null);
 
     /// The current state of the loader.
@@ -246,7 +249,7 @@ public interface ImageLoader
 public interface AnimatedImageLoader : ImageLoader
 {
     /// The animated image file format for this loader.
-    @property AnimatedImageFormat format() const nothrow
+    @property @safe AnimatedImageFormat format() const nothrow
     out (result; result !is null);
 
     /// The width of the frames in the file.
@@ -308,7 +311,7 @@ public abstract class ImageFormat
 {
     private static ImageFormat[] _registered = [];
 
-    @safe private pure this() nothrow
+    @nogc @safe private pure this() nothrow
     {
     }
 
@@ -350,7 +353,7 @@ public abstract class ImageFormat
      * Returns:
      *         The found format, if any, `null` otherwise.
      */
-    public static ImageFormat format(File fp)
+    public static ImageFormat format(ref File fp)
     {
         ubyte[16] bytes;
         ubyte[] head = fp.rawRead(bytes[]);
@@ -410,7 +413,7 @@ public abstract class ImageFormat
      *
      * Returns: The created image loader.
      */
-    public abstract ImageLoader loader(File fp) const;
+    public abstract ImageLoader loader(ref File fp) const;
     /*out(result)
     {
         assert(result.state == LoadState.BeforeInfo || result.state == LoadState.Invalid);
@@ -455,12 +458,13 @@ public abstract class SingleImageFormat : ImageFormat
     /**
      * Base constructor for the [SingleImageFormat] class.
      */
-    @safe public pure this() nothrow
+    @nogc @safe public pure this() nothrow
     {
     }
 
     /// Always `false`.
     @nogc @property @safe public final override pure bool multi() const nothrow
+    out (result; !result)
     {
         return false;
     }
@@ -520,7 +524,7 @@ public abstract class SingleImageFormat : ImageFormat
      * Returns:
      *         The found single-image format, if any, `null` otherwise.
      */
-    public static SingleImageFormat format(File fp)
+    public static SingleImageFormat format(ref File fp)
     {
         ubyte[16] bytes;
         ubyte[] head = fp.rawRead(bytes[]);
@@ -542,7 +546,7 @@ public abstract class SingleImageFormat : ImageFormat
      *
      * Returns: The created image loader.
      */
-    public abstract override ImageLoader loader(File fp) const
+    public abstract override ImageLoader loader(ref File fp) const nothrow
     out (result)
     {
         if (result.state == LoadState.BeforeInfo)
@@ -564,7 +568,7 @@ public abstract class SingleImageFormat : ImageFormat
      *         The image to be exported.
      *         It cannot be null.
      */
-    public abstract void save(File fp, const Bitmap bmp) const
+    public abstract void save(ref File fp, const Bitmap bmp) const
     in (bmp !is null);
 }
 
@@ -578,12 +582,13 @@ public abstract class MultiImageFormat : ImageFormat
     /**
      * Base constructor for the [MultiImageFormat] class.
      */
-    @safe public pure this() nothrow
+    @nogc @safe public pure this() nothrow
     {
     }
 
     /// Always `true`.
     @nogc @property @safe public final override pure bool multi() const nothrow
+    out (result; result)
     {
         return true;
     }
@@ -635,7 +640,7 @@ public abstract class MultiImageFormat : ImageFormat
      * Returns:
      *         The found multi-image format, if any, `null` otherwise.
      */
-    public static MultiImageFormat format(File fp)
+    public static MultiImageFormat format(ref File fp)
     {
         ubyte[16] bytes;
         ubyte[] head = fp.rawRead(bytes[]);
@@ -654,9 +659,21 @@ public abstract class MultiImageFormat : ImageFormat
      *         Any data preceding the file pointer is left untouched.
      *     bitmaps =
      *         The images to be saved.
-     *         The array must contain at least one image and cannot contain null values.
+     *         There must be at least one image and no null values.
      */
-    public abstract void save(File fp, const Bitmap[] bitmaps) const
+    public void save(R)(ref File fp, const R bitmaps) const 
+            if (!is(R == Bitmap[]) && isIterable!R && !isInfinite!R && is(ForeachType!R == Bitmap))
+    in
+    {
+        assert(bitmaps.length > 0);
+    }
+    do
+    {
+        this.save(fp, array(bitmaps));
+    }
+
+    /// ditto
+    public abstract void save(ref File fp, const Bitmap[] bitmaps) const
     in
     {
         assert(bitmaps != null);
@@ -675,12 +692,13 @@ public abstract class AnimatedImageFormat : ImageFormat
     /**
      * Base constructor for the [AnimatedImageFormat] class.
      */
-    @safe public pure this() nothrow
+    @nogc @safe public pure this() nothrow
     {
     }
 
     /// Always `true`.
     @nogc @property @safe public final override pure bool multi() const nothrow
+    out (result; result)
     {
         return true;
     }
@@ -699,7 +717,7 @@ public abstract class AnimatedImageFormat : ImageFormat
      *
      * Returns: The created loader.
      */
-    public abstract override AnimatedImageLoader loader(File fp) const;
+    public abstract override AnimatedImageLoader loader(ref File fp) const;
 
     @safe private static AnimatedImageFormat defaultFormat(const ubyte[] head) nothrow
     {
@@ -748,7 +766,7 @@ public abstract class AnimatedImageFormat : ImageFormat
      * Returns:
      *         The found animated-image format, if any, `null` otherwise.
      */
-    public static AnimatedImageFormat format(File fp)
+    public static AnimatedImageFormat format(ref File fp)
     {
         ubyte[16] bytes;
         ubyte[] head = fp.rawRead(bytes[]);
@@ -769,6 +787,6 @@ public abstract class AnimatedImageFormat : ImageFormat
      *         The animation to be exported.
      *         It cannot be null.
      */
-    public abstract void save(File fp, const Animation animation) const
+    public abstract void save(ref File fp, const Animation animation) const
     in (animation !is null);
 }

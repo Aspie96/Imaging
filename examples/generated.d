@@ -1,4 +1,4 @@
-import imaging : Bitmap, Color, PixelFormat, Rectangle;
+import imaging : Bitmap, Color, flipEndian, PixelFormat, Rectangle;
 import imaging.files : ImageFormat, ImageLoader, LoadState, MultiImageFormat, SingleImageFormat;
 import std.datetime.stopwatch : AutoStart, StopWatch;
 import std.exception : assumeUnique;
@@ -7,7 +7,7 @@ import std.math.algebraic : hypot, sqrt;
 import std.math.exponential : log;
 import std.math.rounding : floor, round;
 import std.math.trigonometry : atan2;
-import std.stdio : File, write, writefln, writeln;
+import std.stdio : File, stdout, write, writefln, writeln;
 
 Bitmap readImage(string fname)
 {
@@ -88,7 +88,8 @@ void main()
     writeln("Imaging library \"generated\" example");
 
     StopWatch sw = StopWatch(AutoStart.no);
-    write("Generating \"dman-colors.bmp\"...");
+    write("Generating \"dman-colors.bmp\"... ");
+    stdout.flush();
     sw.start();
     Bitmap dmanImg = readImage("images/d3.png");
     Color[] dPalette = [Color(0, 0, 0, 0), Color.black, Color.white, Color.d];
@@ -116,10 +117,11 @@ void main()
     ImageFormat.bmp.save(fp, result);
     fp.close();
     sw.stop();
-    writefln(" done (%d ms)!", sw.peek().total!"msecs");
+    writefln("Done (%d ms)!", sw.peek().total!"msecs");
 
     sw.reset();
-    write("Generating \"dman-pop.bmp\"...");
+    write("Generating \"dman-pop.bmp\"... ");
+    stdout.flush();
     sw.start();
     Bitmap popArt = new Bitmap(dmanImg.width * 3, dmanImg.height * 2, PixelFormat.Format24bppRgb);
     Bitmap palettized1 = new Bitmap(dmanImg.width, dmanImg.height, 0, palettized.stride,
@@ -148,10 +150,11 @@ void main()
     ImageFormat.bmp.save(fp, popArt);
     fp.close();
     sw.stop();
-    writefln(" done (%d ms)!", sw.peek().total!"msecs");
+    writefln("Done (%d ms)!", sw.peek().total!"msecs");
 
     sw.reset();
-    write("Generating \"generated1.bmp\"...");
+    write("Generating \"generated1.bmp\"... ");
+    stdout.flush();
     sw.start();
     Bitmap generated1 = new Bitmap(256, 256, PixelFormat.Format24bppRgb);
     generated1.paint((x, y) {
@@ -170,10 +173,11 @@ void main()
     ImageFormat.bmp.save(fp, generated1);
     fp.close();
     sw.stop();
-    writefln(" done (%d ms)!", sw.peek().total!"msecs");
+    writefln("Done (%d ms)!", sw.peek().total!"msecs");
 
     sw.reset();
-    write("Generating \"generated2.bmp\"...");
+    write("Generating \"generated2.bmp\"... ");
+    stdout.flush();
     sw.start();
     Bitmap generated2 = new Bitmap(256, 256, PixelFormat.Format24bppRgb);
     generated2.paint((x, y) {
@@ -192,5 +196,35 @@ void main()
     ImageFormat.bmp.save(fp, generated2);
     fp.close();
     sw.stop();
-    writefln(" done (%d ms)!", sw.peek().total!"msecs");
+    writefln("Done (%d ms)!", sw.peek().total!"msecs");
+
+    Bitmap img1 = new Bitmap(2, 2, PixelFormat.Format32bppRgba);
+    img1.setPixel(0, 0, Color.red);
+    img1.setPixel(1, 0, Color.green);
+    img1.setPixel(0, 1, Color.blue);
+    img1.setPixel(1, 1, Color.black);
+    PixelFormat[] testFormats = [
+        PixelFormat.Format32bppRgba, PixelFormat.Format32bppArgb,
+        flipEndian(PixelFormat.Format32bppRgba),
+        PixelFormat.Format24bppRgbBE, PixelFormat.Format24bppRgbLE
+    ];
+    foreach (PixelFormat pixelFormat; testFormats)
+    {
+        Bitmap img2 = new Bitmap(2, 2, pixelFormat);
+        img2.from(img1, false, false, false);
+        assert(img2.getPixel(0, 0) == Color.red);
+        assert(img2.getPixel(1, 0) == Color.green);
+        assert(img2.getPixel(0, 1) == Color.blue);
+        assert(img2.getPixel(1, 1) == Color.black);
+        img2.from(img1, true, false, false);
+        assert(img2.getPixel(0, 0) == Color.red);
+        assert(img2.getPixel(1, 0) == Color.blue);
+        assert(img2.getPixel(0, 1) == Color.green);
+        assert(img2.getPixel(1, 1) == Color.black);
+        img2.from(img1, false, true, true);
+        assert(img2.getPixel(0, 0) == Color.black);
+        assert(img2.getPixel(1, 0) == Color.blue);
+        assert(img2.getPixel(0, 1) == Color.green);
+        assert(img2.getPixel(1, 1) == Color.red);
+    }
 }

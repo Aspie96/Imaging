@@ -10,12 +10,18 @@ module imaging.extra;
 import imaging : Bitmap;
 import std.algorithm.iteration : sum;
 import std.algorithm.searching : all;
+import std.array : array;
+import std.exception : assumeUnique;
+import std.range.primitives : isInfinite;
+import std.traits : ForeachType, isArray, isFloatingPoint, isIterable, Unconst;
 
 private struct FramesRange
 {
     private Bitmap[] _frames;
 
-    private @nogc @trusted this(Bitmap[] frames)
+    @disable this();
+
+    @nogc @trusted private this(inout Bitmap[] frames) inout nothrow
     in
     {
         assert(frames.length > 0);
@@ -40,7 +46,21 @@ private struct FramesRange
         return 0;
     }
 
+    // See: https://forum.dlang.org/post/lturcepnqxtgqkjkdtkt@forum.dlang.org
     public int opApply(scope int delegate(const Bitmap frame) dg) const
+    {
+        for (size_t i = 0; i < this._frames.length; i++)
+        {
+            int result = dg(this._frames[i]);
+            if (result != 0)
+            {
+                return result;
+            }
+        }
+        return 0;
+    }
+
+    public int opApply(scope int delegate(immutable Bitmap frame) dg) immutable
     {
         for (size_t i = 0; i < this._frames.length; i++)
         {
@@ -66,7 +86,7 @@ private struct FramesRange
         return 0;
     }
 
-    public int opApply(scope int delegate(size_t i, ref const Bitmap frame) dg) const
+    public int opApply(scope int delegate(size_t i, const Bitmap frame) dg) const
     {
         for (size_t i = 0; i < this._frames.length; i++)
         {
@@ -79,7 +99,20 @@ private struct FramesRange
         return 0;
     }
 
-    @nogc @trusted public inout(Bitmap) opIndex(size_t i) inout nothrow
+    public int opApply(scope int delegate(size_t i, immutable Bitmap frame) dg) immutable
+    {
+        for (size_t i = 0; i < this._frames.length; i++)
+        {
+            int result = dg(i, this._frames[i]);
+            if (result != 0)
+            {
+                return result;
+            }
+        }
+        return 0;
+    }
+
+    @nogc @safe public inout(Bitmap) opIndex(size_t i) inout nothrow
     in
     {
         assert(i < this.length);
@@ -90,7 +123,8 @@ private struct FramesRange
     }
 
     /// The number of frames in the range.
-    public @nogc @property @safe pure size_t length() const nothrow
+    @nogc @property @safe public pure size_t length() const nothrow
+    out (result; result > 0)
     {
         return this._frames.length;
     }
@@ -105,6 +139,13 @@ private struct FramesRange
                 == this._frames[0].height)(this._frames));
     }
 }
+
+static assert(isIterable!FramesRange && !isInfinite!FramesRange
+        && is(ForeachType!FramesRange == Bitmap));
+static assert(isIterable!(const FramesRange) && !isInfinite!(const FramesRange)
+        && is(ForeachType!(const FramesRange) == const Bitmap));
+static assert(isIterable!(immutable FramesRange) && !isInfinite!(immutable FramesRange)
+        && is(ForeachType!(immutable FramesRange) == immutable Bitmap));
 
 /**
  * Represents a frame-based animation.
@@ -121,28 +162,77 @@ public class Animation
      * Params:
      *     frames =
      *         The frames in the animation.
+     *         The range must not contain null values.
      *         All frames must have the same width and height.
-     *         The content of the array is cloned, but referenced data is not.
+     *         The range is cloned, but referenced data is not.
      *     durations =
      *         The duration of each frame in the animation, in second.
      *         It must not contain negative values.
-     *         The content of the array is cloned.
+     *         The range is cloned.
      *     plays =
      *         The number of times the animations is to be played.
      *         If 0, the animation is played indefinitely.
      */
-    @safe public this(Bitmap[] frames, const double[] durations, uint plays = 0)
+    @safe public this(R1, R2)(R1 frames, R2 durations, uint plays = 0) nothrow 
+            if (isIterable!R1 && !isInfinite!R1 && is(ForeachType!R1 == Bitmap)
+                && isIterable!R2 && !isInfinite!R2 && isFloatingPoint!(ForeachType!R2))
     in
     {
         assert(frames.length > 0);
         assert(durations.length == frames.length);
-        assert(all!(bmp => bmp !is null)(frames));
-        assert(all!(bmp => bmp.width == frames[0].width && bmp.height == frames[0].height)(frames));
     }
     do
     {
-        this._frames = FramesRange(frames);
-        this._durations = durations.dup;
+        this._frames = FramesRange(array(frames));
+        this._durations = cast(double[]) array(durations);
+        this._plays = plays;
+    }
+
+    // See: https://github.com/dlang/dmd/issues/18575
+
+    /// ditto
+    @safe public this(R1, R2)(R1 frames, R2 durations, uint plays = 0) const nothrow
+            if (isIterable!R1 && !isInfinite!R1 && is(Unconst!(ForeachType!R1) == Bitmap)
+                && isIterable!R2 && !isInfinite!R2 && isFloatingPoint!(ForeachType!R2))
+    in
+    {
+        assert(frames.length > 0);
+        assert(durations.length == frames.length);
+    }
+    do
+    {
+        this._frames = const FramesRange(array(frames));
+        this._durations = cast(const double[]) array(durations);
+        this._plays = plays;
+    }
+
+    /// ditto
+    @trusted public this(R1, R2)(R1 frames, R2 durations, uint plays = 0) immutable nothrow
+            if (isIterable!R1 && !isInfinite!R1 && is(ForeachType!R1 == immutable Bitmap)
+                && isIterable!R2 && !isInfinite!R2 && isFloatingPoint!(ForeachType!R2))
+    in
+    {
+        assert(frames.length > 0);
+        assert(durations.length == frames.length);
+    }
+    do
+    {
+        static if (isArray!R1)
+        {
+            this._frames = immutable FramesRange(frames);
+        }
+        else
+        {
+            this._frames = immutable FramesRange(assumeUnique(array(frames)));
+        }
+        static if (isArray!R2 && is(ForeachType!R2 == immutable ForeachType!R2))
+        {
+            this._durations = durations;
+        }
+        else
+        {
+            this._durations = assumeUnique(array(durations));
+        }
         this._plays = plays;
     }
 
@@ -192,12 +282,14 @@ public class Animation
 
     /// The width of the frames in the animation.
     @nogc @property @safe public pure int width() const nothrow
+    out (result; result > 0)
     {
         return this._frames._frames[0].width;
     }
 
     /// The height of the frames in the animation.
     @nogc @property @safe public pure int height() const nothrow
+    out (result; result > 0)
     {
         return this.frames._frames[0].height;
     }
@@ -210,6 +302,7 @@ public class Animation
 
     /// The duration of each frame in the animation, in second.
     @nogc @property @safe public inout(double[]) durations() inout nothrow
+    out (result; result.length == this.length)
     {
         return this._durations;
     }
@@ -222,12 +315,13 @@ public class Animation
 
     /// The amount of frames in the animation.
     @nogc @property @safe public pure size_t length() const nothrow
+    out (result; result > 0)
     {
         return this.frames.length;
     }
 
     /// The amount of times the animation is played.
-    /// O means the animation is played indefinitely.
+    /// 0 means the animation is played indefinitely.
     @nogc @property @safe public pure uint plays() const nothrow
     {
         return this._plays;
@@ -235,6 +329,7 @@ public class Animation
 
     /// ditto
     @nogc @property @safe public pure uint plays(uint plays) nothrow
+    out (; this.plays == plays)
     {
         return this._plays = plays;
     }

@@ -1,7 +1,7 @@
-import imaging : Bitmap;
+import imaging : Bitmap, Color, PixelFormat;
 import imaging.extra : Animation;
 import imaging.files : AnimatedImageFormat, AnimatedImageLoader, ImageFormat,
-    ImageLoader, LoadState, SingleImageFormat;
+    ImageLoader, LoadState, MultiImageFormat, SingleImageFormat;
 import imaging.files.apng : ApngFormat;
 import imaging.files.png : PngFormat;
 import std.algorithm.iteration : map;
@@ -9,7 +9,7 @@ import std.array : array;
 import std.datetime.stopwatch : AutoStart, StopWatch;
 import std.digest.sha : sha256Of;
 import std.file : dirEntries, DirEntry, remove, SpanMode;
-import std.stdio : File, write, writefln, writeln;
+import std.stdio : File, stdout, write, writefln, writeln;
 
 Bitmap readImage(string fname)
 {
@@ -40,7 +40,8 @@ void main()
     writeln("Imaging library \"files\" example");
 
     StopWatch sw = StopWatch(AutoStart.no);
-    write("Testing good BMP files...");
+    write("Testing good BMP files... ");
+    stdout.flush();
     sw.start();
     auto bmpTests = dirEntries("images/bmpsuite/g", "*.bmp", SpanMode.shallow);
     foreach (string fname; bmpTests)
@@ -53,11 +54,12 @@ void main()
         assert(img2.equals(img1));
     }
     sw.stop();
-    writefln(" done (%d ms)!", sw.peek().total!"msecs");
+    writefln("Done (%d ms)!", sw.peek().total!"msecs");
     remove("tmp.bmp");
 
     sw.reset();
-    write("Testing questionable BMP files...");
+    write("Testing questionable BMP files... ");
+    stdout.flush();
     sw.start();
     auto bmpQuestionableTests = map!(s => "images/bmpsuite/q/" ~ s)([
         "pal1p1.bmp", "pal2.bmp", "pal2color.bmp", "pal8offs.bmp",
@@ -76,11 +78,12 @@ void main()
         assert(img2.equals(img1));
     }
     sw.stop();
-    writefln(" done (%d ms)!", sw.peek().total!"msecs");
+    writefln("Done (%d ms)!", sw.peek().total!"msecs");
     remove("tmp.bmp");
 
     sw.reset();
-    write("Testing bad BMP files...");
+    write("Testing bad BMP files... ");
+    stdout.flush();
     sw.start();
     auto bmpBadTests = dirEntries("images/bmpsuite/b", "*.bmp", SpanMode.shallow);
     foreach (string fname; bmpBadTests)
@@ -95,10 +98,11 @@ void main()
         fp.close();
     }
     sw.stop();
-    writefln(" done (%d ms)!", sw.peek().total!"msecs");
+    writefln("Done (%d ms)!", sw.peek().total!"msecs");
 
     sw.reset();
-    write("Testing QOI files...");
+    write("Testing QOI files... ");
+    stdout.flush();
     sw.start();
     auto qoiTests = dirEntries("images/qoi_test_images", "*.qoi", SpanMode.shallow);
     foreach (string fname; qoiTests)
@@ -118,11 +122,12 @@ void main()
         assert(hash1 == hash2);
     }
     sw.stop();
-    writefln(" done (%d ms)!", sw.peek().total!"msecs");
+    writefln("Done (%d ms)!", sw.peek().total!"msecs");
     remove("tmp.qoi");
 
     sw.reset();
-    write("Testing PNG files...");
+    write("Testing PNG files... ");
+    stdout.flush();
     sw.start();
     auto pngTests = dirEntries("images/PngSuite", "*.png", SpanMode.shallow);
     foreach (string fname; pngTests)
@@ -150,7 +155,7 @@ void main()
         }
     }
     sw.stop();
-    writefln(" done (%d ms)!", sw.peek().total!"msecs");
+    writefln("Done (%d ms)!", sw.peek().total!"msecs");
     remove("tmp.png");
 
     DirEntry[] apngTests = array(dirEntries("images/apng", "*.png", SpanMode.shallow));
@@ -158,7 +163,8 @@ void main()
     DirEntry[] badApngTests = apngTests[39 .. $];
 
     sw.reset();
-    write("Testing valid APNG files...");
+    write("Testing valid APNG files... ");
+    stdout.flush();
     sw.start();
     foreach (string fname; validApngTests)
     {
@@ -186,11 +192,12 @@ void main()
         }
     }
     sw.stop();
-    writefln(" done (%d ms)!", sw.peek().total!"msecs");
+    writefln("Done (%d ms)!", sw.peek().total!"msecs");
     remove("tmp.apng");
 
     sw.reset();
-    write("Testing invalid APNG files...");
+    write("Testing invalid APNG files... ");
+    stdout.flush();
     sw.start();
     foreach (string fname; badApngTests)
     {
@@ -214,5 +221,5 @@ void main()
         fp.close();
     }
     sw.stop();
-    writefln(" done (%d ms)!", sw.peek().total!"msecs");
+    writefln("Done (%d ms)!", sw.peek().total!"msecs");
 }

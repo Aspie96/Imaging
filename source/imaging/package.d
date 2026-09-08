@@ -177,7 +177,7 @@ public enum PixelFormat
 
 /// Value of [indexed] for each pixel format.
 /// Indexed formats are those with "Indexed" in their name.
-pure nothrow @nogc @safe unittest
+@nogc @safe pure nothrow unittest
 {
     assert(PixelFormat.Format1bppIndexed.indexed);
     assert(PixelFormat.Format4bppIndexed.indexed);
@@ -223,7 +223,7 @@ pure nothrow @nogc @safe unittest
 
 /// Value of [bpp] for each pixel format.
 /// The number of bits per pixel is in the name of each format.
-pure nothrow @nogc @safe unittest
+@nogc @safe pure nothrow unittest
 {
     assert(PixelFormat.Format1bppIndexed.bpp == 1);
     assert(PixelFormat.Format4bppIndexed.bpp == 4);
@@ -245,8 +245,9 @@ pure nothrow @nogc @safe unittest
 
 /// The alignment size for pixel data for the given format, in bytes.
 @nogc @safe public pure int alignSize(PixelFormat pixelFormat) nothrow
+out (result; result == 1 || result == 2 || result == 4)
 {
-    final switch (bpp(pixelFormat))
+    final switch (pixelFormat.bpp)
     {
     case 1, 4:
         return 1;
@@ -263,7 +264,7 @@ pure nothrow @nogc @safe unittest
 
 /// Value of [alignSize] for each pixel format.
 // The alignment size for each pixel fomat is the same as that of the integral type with the same size if any exists or 1 otherwise.
-pure nothrow @nogc @safe unittest
+@nogc @safe pure nothrow unittest
 {
     assert(PixelFormat.Format1bppIndexed.alignSize == 1);
     assert(PixelFormat.Format4bppIndexed.alignSize == 1);
@@ -310,7 +311,7 @@ pure nothrow @nogc @safe unittest
 
 /// Output of [flipEndian] for each pixel format.
 /// When a pixel format has no more than 8 bits per pixel swapping its endianness doesn't change it.
-pure nothrow @nogc @safe unittest
+@nogc @safe pure nothrow unittest
 {
     assert(flipEndian(PixelFormat.Format1bppIndexed) == PixelFormat.Format1bppIndexed);
     assert(flipEndian(PixelFormat.Format4bppIndexed) == PixelFormat.Format4bppIndexed);
@@ -395,7 +396,7 @@ pure nothrow @nogc @safe unittest
     }
 
     /// Creating a [Color] instance from a value in hexadecimal form
-    pure nothrow @nogc unittest
+    @nogc pure nothrow unittest
     {
         Color c = Color(0xBA595EFF);
         assert(c.r == 0xBA);
@@ -423,7 +424,7 @@ pure nothrow @nogc @safe unittest
 
     /// Creating a [Color] instance from R, G, B and A values.
     /// The alpha value defaults to the maximum, representing full opaqueness.
-    pure nothrow @nogc unittest
+    @nogc pure nothrow unittest
     {
         Color c = Color(0xBA, 0x59, 0x5E, 0xFF);
         assert(c.rgba == 0xBA595EFF);
@@ -474,7 +475,7 @@ pure nothrow @nogc @safe unittest
     }
 
     /// Representing a number of shades of gray
-    pure nothrow @nogc unittest
+    @nogc pure nothrow unittest
     {
         for (int i = 0; i < 50; i++)
         {
@@ -500,7 +501,7 @@ pure nothrow @nogc @safe unittest
     }
 
     /// Getting the luma for a color
-    pure nothrow @nogc unittest
+    @nogc pure nothrow unittest
     {
         Color c = Color.gray(0xBA);
         assert(c.luma == 0xBA);
@@ -526,6 +527,7 @@ pure nothrow @nogc @safe unittest
      *     When both colors are fully opaque, the squared redmean distance is returned.
      */
     @nogc public pure int distSquared(Color other) const nothrow
+    out (result; result >= 0)
     {
         if (this.a == 0xFF && other.a == 0xFF)
         {
@@ -559,6 +561,7 @@ pure nothrow @nogc @safe unittest
      *     The redmean distance between the two colors if both are fully opaque.
      */
     @nogc public pure float dist(Color other) const nothrow
+    out (result; result >= 0)
     {
         int squared = this.distSquared(other);
         return sqrt(cast(float) squared);
@@ -566,7 +569,7 @@ pure nothrow @nogc @safe unittest
 
     /// Computing the difference between two colors.
     /// It is symmmetric and 0 for two identical colors, as well as for any two full transparencies.
-    pure nothrow @nogc unittest
+    @nogc pure nothrow unittest
     {
         assert(Color.red.dist(Color.d) == Color.d.dist(Color.red));
         assert(Color.red.dist(Color.red) == 0);
@@ -577,7 +580,7 @@ pure nothrow @nogc @safe unittest
 static assert(Color.alignof == int.alignof);
 
 /**
- * Alpha-blends the given background color and foreground color.
+ * Overlaps and alpha-blends the given background color and foreground color.
  *
  * Params:
  *     back = The background color.
@@ -616,7 +619,7 @@ static assert(Color.alignof == int.alignof);
 }
 
 /// Alpha-blending colors
-pure nothrow @nogc @safe unittest
+@nogc @safe pure nothrow unittest
 {
     assert(blend(Color.red, Color.blue) == Color.blue);
     assert(blend(Color.blue, Color.red) == Color.red);
@@ -688,7 +691,7 @@ in (0 <= factor && factor <= 1)
 }
 
 /// Mixing colors
-pure nothrow @nogc @safe unittest
+@nogc @safe pure nothrow unittest
 {
     Color c1 = mix(Color.red, Color.green);
     float dist = Color.red.dist(Color.green);
@@ -731,10 +734,12 @@ public struct Rectangle
 public interface Image(T)
 {
     /// The width of the image, in pixels.
+    /// Always greater than 0.
     @nogc @safe @property pure int width() const nothrow
     out (result; result > 0);
 
     /// The height of the image, in pixels.
+    /// Always greater than 0.
     @nogc @safe @property pure int height() const nothrow
     out (result; result > 0);
 
@@ -820,7 +825,7 @@ public interface Image(T)
     return val1;
 }
 
-@nogc private static void copyBitsBuffer(ubyte* dest, size_t destOffset,
+@nogc private void copyBitsBuffer(ubyte* dest, size_t destOffset,
         const(ubyte)* src, size_t srcOffset, size_t length) nothrow
 {
     if (length != 0)
@@ -911,7 +916,7 @@ public interface Image(T)
     }
 }
 
-private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits = null)
+private void flipBits(ubyte* buffer, size_t offset, size_t length, bool[] bits = null)
 {
     buffer += offset / 8;
     offset %= 8;
@@ -939,7 +944,7 @@ private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[]
     }
 }
 
-@nogc private static void fillBitsBuffer(ubyte* buffer, size_t offset, size_t length, bool value) nothrow
+@nogc private void fillBitsBuffer(ubyte* buffer, size_t offset, size_t length, bool value) nothrow
 {
     if (length != 0)
     {
@@ -982,25 +987,25 @@ private static void flipBits(ubyte* buffer, size_t offset, size_t length, bool[]
 // If possible, computes an arithmetically correct ((skipX + width) * pixelFormat.bpp + 7) / 8.
 // Using that expression alone may produce incorrect results due to intermediate values exceding the maximum of their type.
 // If the final result does not fit in a size_t value, false is asserted.
-@nogc @safe private pure size_t minStride(size_t skipX, int width, int bpp) nothrow
+@nogc @safe private pure ulong minStride(ulong skipX, int width, int bpp) nothrow
 {
     if (bpp < 8)
     {
-        size_t stride1 = (skipX >> 3) * bpp;
+        ulong stride1 = (skipX >> 3) * bpp;
         assert(stride1 % bpp == 0 && stride1 / bpp == (skipX >> 3));
-        size_t stride2 = (width >> 3) * bpp;
+        ulong stride2 = (width >> 3) * bpp;
         assert(stride2 % bpp == 0 && stride2 / bpp == (width >> 3));
         int r1 = skipX & 0b111;
         int r2 = width & 0b111;
         int stride3 = ((r1 + r2) * bpp + 7) >> 3;
-        assert(stride2 <= size_t.max - stride1 && stride3 <= size_t.max - (stride1 + stride2));
-        size_t stride = stride1 + stride2 + stride3;
+        assert(stride2 <= ulong.max - stride1 && stride3 <= ulong.max - (stride1 + stride2));
+        ulong stride = stride1 + stride2 + stride3;
         return stride;
     }
     int bytesPerPixel = bpp >> 3;
-    assert(width <= size_t.max - skipX);
-    size_t values = skipX + width;
-    size_t stride = values * bytesPerPixel;
+    assert(width <= ulong.max - skipX);
+    ulong values = skipX + width;
+    ulong stride = values * bytesPerPixel;
     assert(stride % bytesPerPixel == 0 && stride / bytesPerPixel == values);
     return stride;
 }
@@ -1085,7 +1090,7 @@ do
 }
 
 /// ditto
-public @safe void[] pixelDataAlloc(int width, int height, PixelFormat pixelFormat) nothrow
+@safe public void[] pixelDataAlloc(int width, int height, PixelFormat pixelFormat) nothrow
 in (width > 0 && height > 0)
 out (result)
 {
@@ -1117,7 +1122,7 @@ unittest
 {
     private immutable int _width;
     private immutable int _height;
-    private immutable size_t _skipX;
+    private immutable ulong _skipX;
     private immutable size_t _stride;
     private immutable PixelFormat _pixelFormat;
     private immutable(Color)[] _palette;
@@ -1136,8 +1141,7 @@ unittest
      *         For an indexed pixel format, it must have a length between 1 and the maximum for that format.
      *         For a non-indexed format, it must be an empty array, representing the absence of a color table.
      */
-    @trusted public this(int width, int height, PixelFormat pixelFormat,
-            immutable Color[] palette = null) nothrow
+    public this(int width, int height, PixelFormat pixelFormat, immutable Color[] palette = null) nothrow
     in
     {
         assert(width > 0 && height > 0);
@@ -1223,13 +1227,12 @@ unittest
      *         The array must be aligned to the alignment size of the pixel format.
      *         Its length must be the product between `stride` and `height`.
      */
-    @trusted public this(int width, int height, size_t skipX, size_t stride,
+    @nogc @trusted public this(int width, int height, ulong skipX, size_t stride,
             PixelFormat pixelFormat, immutable Color[] palette, bool bottomUp, inout void[] data) inout nothrow
     in
     {
         assert(width > 0 && height > 0);
-        size_t mStride = minStride(skipX, width, pixelFormat.bpp);
-        assert(mStride != 0 && stride >= mStride);
+        assert(stride >= minStride(skipX, width, pixelFormat.bpp));
         assert(data != null);
         assert(data.length % stride == 0 && data.length / stride == height);
         assert((cast(size_t) data.ptr) % pixelFormat.alignSize == 0);
@@ -1273,19 +1276,21 @@ unittest
     }
 
     /// The width of the image, in pixels.
+    /// Always greater than 0.
     @nogc @property public pure int width() const nothrow
     {
         return this._width;
     }
 
     /// The height of the image, in pixels.
+    /// Always greater than 0.
     @nogc @property public pure int height() const nothrow
     {
         return this._height;
     }
 
     /// The number of values in pixel data to be skipped from the left, in pixel size.
-    @nogc @property public pure size_t skipX() const nothrow
+    @nogc @property public pure ulong skipX() const nothrow
     {
         return this._skipX;
     }
@@ -1347,6 +1352,25 @@ unittest
         }
     }
 
+    /// Setting and retrieving the palette of an image
+    unittest
+    {
+        Bitmap img = new Bitmap(2, 2, PixelFormat.Format1bppIndexed, [
+            Color.black, Color.white
+        ]);
+        assert(img.palette == [Color.black, Color.white]);
+        img.palette = [Color.white, Color.black];
+        assert(img.palette == [Color.white, Color.black]);
+        img = new Bitmap(2, 2, PixelFormat.Format32bppRgba);
+        assert(img.palette.ptr == null && img.palette.length == 0);
+        img.palette = null;
+        assert(img.palette.ptr == null && img.palette.length == 0);
+        immutable Color[] palette = [Color.white, Color.black];
+        assert(palette[0 .. 0].ptr != null);
+        img.palette = palette[0 .. 0];
+        assert(img.palette.ptr == null && img.palette.length == 0);
+    }
+
     /// Whether rows in the image go from bottom to top.
     /// `false` if the origin of the image is in the top-left corner, the Y coordinate runs from top to bottom and pixel data scans lines from top to bottom.
     /// `true` if the origin of the image is in the bottom-left corner, the Y coordinate goes from bottom to top and pixel data scans lines from bottom to top.
@@ -1357,6 +1381,7 @@ unittest
 
     /// ditto
     @nogc @property public pure void bottomUp(bool bottomUp) nothrow
+    out (; this.bottomUp == bottomUp)
     {
         this._bottomUp = bottomUp;
     }
@@ -2110,7 +2135,7 @@ unittest
     }
     do
     {
-        size_t skipX = this.skipX + rect.x;
+        ulong skipX = this.skipX + rect.x;
         inout void[] data = this.data[this.stride * rect.y .. this.stride * (rect.y + rect.height)];
         return new inout Bitmap(rect.width, rect.height, skipX, this.stride,
                 this.pixelFormat, this.palette, this.bottomUp, data);
@@ -2827,8 +2852,8 @@ unittest
      *         Enough space for the data must be available.
      *     skipX = The amount of positions to skip from `dest`, in pixel size.
      */
-    @nogc @system public void rawLine(int y, void* dest, size_t skipX = 0) const nothrow
-    in ((cast(size_t) dest) % alignSize == 0)
+    @nogc @system public void rawLine(int y, void* dest, ulong skipX = 0) const nothrow
+    in ((cast(size_t) dest) % this.alignSize == 0)
     {
         const(ubyte)* ptr = this._data.ptr + this.stride * y;
         copyBitsBuffer(cast(ubyte*) dest, skipX * this.bpp, ptr,
@@ -2890,11 +2915,11 @@ unittest
      *
      * Throws: If the specified pixel format and color table aren't equal to those of the image and the line contains invalid pixels.
      */
-    @system public void rawLine(int y, void* dest, size_t skipX,
+    @system public void rawLine(int y, void* dest, ulong skipX,
             PixelFormat pixelFormat, const(Color)[] palette = null) const
     in
     {
-        assert((cast(size_t) dest) % alignSize == 0);
+        assert((cast(size_t) dest) % pixelFormat.alignSize == 0);
         if (pixelFormat.indexed)
         {
             assert(palette == null || palette.length <= 1 << pixelFormat.bpp);
@@ -3168,37 +3193,88 @@ unittest
     /// Copying data from an image onto another, while optionally transposing it, flipping it vertically and flipping it horizontally
     unittest
     {
-        Bitmap img1 = new Bitmap(2, 2, PixelFormat.Format32bppRgba);
-        img1.setPixel(0, 0, Color.red);
-        img1.setPixel(1, 0, Color.green);
-        img1.setPixel(0, 1, Color.blue);
-        img1.setPixel(1, 1, Color.black);
         PixelFormat[] testFormats = [
-            PixelFormat.Format32bppRgba, PixelFormat.Format32bppArgb,
-            flipEndian(PixelFormat.Format32bppRgba)
+            PixelFormat.Format1bppIndexed, PixelFormat.Format4bppIndexed,
+            PixelFormat.Format8bppIndexed
         ];
-        foreach (PixelFormat pixelFormat; testFormats)
+        foreach (PixelFormat pixelFormat1; testFormats)
         {
-            Bitmap img2 = new Bitmap(2, 2, pixelFormat);
-            img2.from(img1, false, false, false);
-            assert(img2.getPixel(0, 0) == Color.red);
-            assert(img2.getPixel(1, 0) == Color.green);
-            assert(img2.getPixel(0, 1) == Color.blue);
-            assert(img2.getPixel(1, 1) == Color.black);
-            img2.from(img1, true, false, false);
-            assert(img2.getPixel(0, 0) == Color.red);
-            assert(img2.getPixel(1, 0) == Color.blue);
-            assert(img2.getPixel(0, 1) == Color.green);
-            assert(img2.getPixel(1, 1) == Color.black);
-            img2.from(img1, false, true, true);
-            assert(img2.getPixel(0, 0) == Color.black);
-            assert(img2.getPixel(1, 0) == Color.blue);
-            assert(img2.getPixel(0, 1) == Color.green);
-            assert(img2.getPixel(1, 1) == Color.red);
+            Bitmap img1 = new Bitmap(3, 3, pixelFormat1, [
+                Color.black, Color.white
+            ]);
+            img1.setPixel(0, 0, Color.white);
+            img1.setPixel(1, 0, Color.black);
+            img1.setPixel(2, 0, Color.white);
+            img1.setPixel(0, 1, Color.white);
+            img1.setPixel(1, 1, Color.white);
+            img1.setPixel(2, 1, Color.black);
+            img1.setPixel(0, 2, Color.black);
+            img1.setPixel(1, 2, Color.black);
+            img1.setPixel(2, 2, Color.black);
+            foreach (PixelFormat pixelFormat2; testFormats)
+            {
+                Bitmap img2 = new Bitmap(3, 3, pixelFormat2, [
+                    Color.black, Color.white
+                ]);
+                img2.from(img1, false, false, false);
+                assert(img2.getPixel(0, 0) == Color.white);
+                assert(img2.getPixel(1, 0) == Color.black);
+                assert(img2.getPixel(2, 0) == Color.white);
+                assert(img2.getPixel(0, 1) == Color.white);
+                assert(img2.getPixel(1, 1) == Color.white);
+                assert(img2.getPixel(2, 1) == Color.black);
+                assert(img2.getPixel(0, 2) == Color.black);
+                assert(img2.getPixel(1, 2) == Color.black);
+                assert(img2.getPixel(2, 2) == Color.black);
+                img2.from(img1, true, false, false);
+                assert(img2.getPixel(0, 0) == Color.white);
+                assert(img2.getPixel(1, 0) == Color.white);
+                assert(img2.getPixel(2, 0) == Color.black);
+                assert(img2.getPixel(0, 1) == Color.black);
+                assert(img2.getPixel(1, 1) == Color.white);
+                assert(img2.getPixel(2, 1) == Color.black);
+                assert(img2.getPixel(0, 2) == Color.white);
+                assert(img2.getPixel(1, 2) == Color.black);
+                assert(img2.getPixel(2, 2) == Color.black);
+            }
         }
-        img1 = new Bitmap(2, 2, PixelFormat.Format4bppIndexed, [
-            Color.red, Color.green, Color.blue, Color.black
-        ]);
+        testFormats = [
+            PixelFormat.Format16bppRgb555BE, PixelFormat.Format16bppRgb555LE,
+            PixelFormat.Format16bppRgb565BE, PixelFormat.Format16bppRgb565LE,
+            PixelFormat.Format24bppRgbBE, PixelFormat.Format24bppRgbLE,
+            PixelFormat.Format32bppXrgbBE, PixelFormat.Format32bppXrgbLE,
+            PixelFormat.Format32bppArgbBE, PixelFormat.Format32bppArgbLE,
+            PixelFormat.Format32bppRgbaBE, PixelFormat.Format32bppRgbaLE
+        ];
+        foreach (PixelFormat pixelFormat1; testFormats)
+        {
+            Bitmap img1 = new Bitmap(2, 2, pixelFormat1);
+            img1.setPixel(0, 0, Color.red);
+            img1.setPixel(1, 0, Color.green);
+            img1.setPixel(0, 1, Color.blue);
+            img1.setPixel(1, 1, Color.black);
+            foreach (PixelFormat pixelFormat2; testFormats)
+            {
+                Bitmap img2 = new Bitmap(2, 2, pixelFormat2);
+                img2.from(img1, false, false, false);
+                assert(img2.getPixel(0, 0) == Color.red);
+                assert(img2.getPixel(1, 0) == Color.green);
+                assert(img2.getPixel(0, 1) == Color.blue);
+                assert(img2.getPixel(1, 1) == Color.black);
+                img2.from(img1, true, false, false);
+                assert(img2.getPixel(0, 0) == Color.red);
+                assert(img2.getPixel(1, 0) == Color.blue);
+                assert(img2.getPixel(0, 1) == Color.green);
+                assert(img2.getPixel(1, 1) == Color.black);
+                img2.from(img1, false, true, true);
+                assert(img2.getPixel(0, 0) == Color.black);
+                assert(img2.getPixel(1, 0) == Color.blue);
+                assert(img2.getPixel(0, 1) == Color.green);
+                assert(img2.getPixel(1, 1) == Color.red);
+            }
+        }
+        Bitmap img1 = new Bitmap(2, 2, PixelFormat.Format4bppIndexed,
+                [Color.red, Color.green, Color.blue, Color.black]);
         img1.setPixel(0, 0, Color.red);
         img1.setPixel(1, 0, Color.green);
         img1.setPixel(0, 1, Color.blue);
@@ -3268,12 +3344,12 @@ unittest
     }
 
     /**
-     * Blends the given foreground image on top of this image.
+     * Overlaps and blends the given foreground image on top of this image.
      * This image must use a pixel format with at least 24 bits per pixel.
      *
      * Params:
      *     foreground =
-     *         The foreground image to blend on top of this one.
+     *         The foreground image to be blended on top of this one.
      *         It must have the same width and height as this image.
      */
     @trusted public void blendFrom(const Bitmap foreground)
@@ -3473,7 +3549,9 @@ unittest
         img1.setPixel(1, 0, Color.red);
         img1.setPixel(0, 1, Color.red);
         img1.setPixel(1, 1, Color(0, 0, 0, 0));
-        Bitmap img2 = new Bitmap(2, 2, PixelFormat.Format32bppRgba);
+        Bitmap img2 = new Bitmap(3, 2, PixelFormat.Format32bppRgba);
+        assert(!img1.equals(img2));
+        img2 = new Bitmap(2, 2, PixelFormat.Format32bppRgba);
         img2.setPixel(0, 0, Color.red);
         img2.setPixel(1, 0, Color.red);
         img2.setPixel(0, 1, Color.red);
@@ -3783,23 +3861,23 @@ unittest
      * Repeats the given action for each pixel in the image.
      *
      * Params:
-     *     action = The action to be repeated.
+     *     dg = The action to be repeated.
      */
-    @system public void forEach(void delegate(int x, int y) action) const
+    @system public void forEach(void delegate(int x, int y) dg) const
     {
         for (int y = 0; y < this.height; y++)
         {
             for (int x = 0; x < this.width; x++)
             {
-                action(x, y);
+                dg(x, y);
             }
         }
     }
 
     /// ditto
-    @trusted public void forEach(void delegate(int x, int y) @safe action) const
+    @trusted public void forEach(void delegate(int x, int y) @safe dg) const
     {
-        this.forEach(cast(void delegate(int, int) @system) action);
+        this.forEach(cast(void delegate(int, int) @system) dg);
     }
 
     /// Repeating an action for each pixel in the image using its coordinates
@@ -3825,15 +3903,15 @@ unittest
     }
 
     /// ditto
-    @system public void forEach(void delegate(int x, int y, Color color) action) const
+    @system public void forEach(void delegate(int x, int y, Color color) dg) const
     {
-        (cast(Bitmap) this).readWrite!(true, false)(action);
+        (cast(Bitmap) this).readWrite!(true, false)(dg);
     }
 
     /// ditto
-    @trusted public void forEach(void delegate(int x, int y, Color color) @safe action) const
+    @trusted public void forEach(void delegate(int x, int y, Color color) @safe dg) const
     {
-        this.forEach(cast(void delegate(int, int, Color) @system) action);
+        this.forEach(cast(void delegate(int, int, Color) @system) dg);
     }
 
     /// Performing an action for each pixel in an image using its coordinates and its color
@@ -3889,7 +3967,9 @@ unittest
             private size_t _x1;
             private const(ubyte)* _ptr;
 
-            private @nogc @trusted this(const Bitmap self, int y)
+            @disable this();
+
+            @nogc @trusted private this(const Bitmap self, int y)
             in
             {
                 assert(self !is null);
@@ -3905,7 +3985,7 @@ unittest
 
             /// The current pixel color, corresponding to the beginning of the range.
             /// Throws: If the pixel has an invalid value.
-            public @property @trusted Color front() const
+            @property @trusted public Color front() const
             in (!this.empty)
             {
                 return this._self.readColor(this._ptr, this._x0);
@@ -3918,7 +3998,7 @@ unittest
              *
              * Throws: If the pixel has an invalid value.
              */
-            public @safe Color moveFront()
+            @safe public Color moveFront()
             in (!this.empty)
             {
                 Color color = this.front();
@@ -3929,14 +4009,14 @@ unittest
             /*
              * Advances the beginning of the range by one element.
              */
-            public @nogc @safe void popFront() nothrow
+            @nogc @safe public void popFront() nothrow
             in (!this.empty)
             {
                 this._x0++;
             }
 
             /// Whether there is no longer any data to be retrieved.
-            public @nogc @property @safe pure bool empty() const nothrow
+            @nogc @property @safe public pure bool empty() const nothrow
             {
                 return this._x0 >= this._x1;
             }
@@ -3986,14 +4066,14 @@ unittest
             }
 
             /// A copy of the range, as a view on the same underlying data.
-            public @nogc @property @trusted Result save() const nothrow
+            @nogc @property @trusted public Result save() const nothrow
             {
                 return cast(Result) this;
             }
 
             /// The pixel color corresponding to the end of the array.
             /// Throws: If the pixel has an invalid value.
-            public @property @trusted Color back() const
+            @property @trusted public Color back() const
             in (!this.empty)
             {
                 return this._self.readColor(this._ptr, this._x1 - 1);
@@ -4006,7 +4086,7 @@ unittest
              *
              * Throws: If the pixel has an invalid value.
              */
-            public @safe Color moveBack()
+            @safe public Color moveBack()
             in (!this.empty)
             {
                 Color color = this.back;
@@ -4017,7 +4097,7 @@ unittest
             /*
              * Removes an element from the back of the range.
              */
-            public @nogc @safe void popBack() nothrow
+            @nogc @safe public void popBack() nothrow
             in (!this.empty)
             {
                 this._x1--;
@@ -4044,7 +4124,7 @@ unittest
              *
              * Returns: The new front of the range.
              */
-            public @safe Color moveAt(size_t x)
+            @safe public Color moveAt(size_t x)
             in
             {
                 assert(!this.empty);
@@ -4057,7 +4137,7 @@ unittest
             }
 
             /// The number of element in the range, initially equal to the width of the image.
-            public @nogc @property @safe pure size_t length() const nothrow
+            @nogc @property @safe public pure size_t length() const nothrow
             {
                 return this._x1 - this._x0;
             }
@@ -4810,13 +4890,12 @@ unittest
         img.setPixel(3, 4, Color(255, 255, 255, 0));
         img.setPixel(4, 4, Color(255, 255, 255, 0));
         size_t[Color] counts = img.counts();
-        // See: https://forum.dlang.org/post/fmzxhrqyxuactuhwskgx@forum.dlang.org
-        assert(counts[Color(255, 0, 0)] == 10);
-        assert(counts[Color(0, 255, 0)] == 1);
-        assert(counts[Color(0, 0, 255)] == 1);
-        assert(counts[Color(0, 255, 255)] == 1);
-        assert(counts[Color(255, 0, 255)] == 1);
-        assert(counts[Color(255, 255, 0)] == 1);
+        assert(counts[Color.red] == 10);
+        assert(counts[Color.green] == 1);
+        assert(counts[Color.blue] == 1);
+        assert(counts[Color.cyan] == 1);
+        assert(counts[Color.magenta] == 1);
+        assert(counts[Color.yellow] == 1);
         assert(counts[Color(0, 0, 0, 0)] == 5);
         assert(counts[Color(255, 255, 255, 0)] == 5);
     }
@@ -4827,7 +4906,7 @@ unittest
      *
      * Returns:
      *     An array containing, for each entry of the color table, the amount of times it appears in the image.
-     *     The array has the same lenght as the color table.
+     *     The array has the same length as the color table.
      *
      * Throws: If the image contains invalid values.
      */
@@ -4929,8 +5008,7 @@ unittest
     invariant
     {
         assert(this._width > 0 && this._height > 0);
-        size_t mStride = minStride(this._skipX, this._width, this._pixelFormat.bpp);
-        assert(mStride != 0 && this._stride >= mStride);
+        assert(this._stride >= minStride(this._skipX, this._width, this._pixelFormat.bpp));
         assert(this._data != null);
         assert(this._data.length % this._stride == 0
                 && this._data.length / this._stride == this._height);

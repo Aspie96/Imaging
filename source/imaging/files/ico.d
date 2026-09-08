@@ -149,7 +149,7 @@ public final class IcoLoader : ImageLoader
      *         The file pointer to be used.
      *         It must be open for binary read.
      */
-    public this(File fp)
+    public this(ref File fp)
     {
         this._fp = fp;
         this._state = LoadState.Invalid;
@@ -868,7 +868,7 @@ public final class IcoFormat : MultiImageFormat
 {
     private static IcoFormat _instance = null;
 
-    @safe private pure this() nothrow
+    @nogc @safe private pure this() nothrow
     {
     }
 
@@ -916,7 +916,7 @@ public final class IcoFormat : MultiImageFormat
      *
      * Returns: The created loader.
      */
-    public override IcoLoader loader(File fp) const
+    public override IcoLoader loader(ref File fp) const
     {
         return new IcoLoader(fp);
     }
@@ -932,10 +932,14 @@ public final class IcoFormat : MultiImageFormat
      *         Any data preceding the file pointer is left untouched.
      *     bitmaps =
      *         The images to be saved.
-     *         The array must contain at least one image and cannot contain null values.
+     *         There must be at least one image and no null values.
      *         The width and height of each image must be no larger than 256.
      */
-    public override void save(File fp, const Bitmap[] bitmaps) const
+    // See: https://forum.dlang.org/post/rswqqpfnnwqazoapcutd@forum.dlang.org
+    public alias save(R) = MultiImageFormat.save!R;
+
+    /// ditto
+    public override void save(ref File fp, const Bitmap[] bitmaps) const
     in
     {
         assert(bitmaps != null);
