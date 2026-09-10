@@ -62,19 +62,19 @@ public enum PixelFormat
     /// Same as [java.awt.image.BufferedImage.TYPE_BYTE_GRAY](https://docs.oracle.com/javase/8/docs/api/java/awt/image/BufferedImage.html#TYPE_BYTE_GRAY) in Java AWT.
     Format8bppGray,
 
-    /// Specifies that the format is 16 bits per pixel, in big endian byte order, where 5 bits each are used for the red, green and blue components and the most significant bit is not used.
+    /// Specifies that the format is 16 bits per pixel (high color), in big endian byte order, where 5 bits each are used for the red, green and blue components and the most significant bit is not used.
     /// Same as [Format16bppRgb555] on big-endian architectures.
     Format16bppRgb555BE,
 
-    /// Specifies that the format is 16 bits per pixel, in little endian byte order, where 5 bits each are used for the red, green and blue components and the most significant bit is not used.
+    /// Specifies that the format is 16 bits per pixel (high color), in little endian byte order, where 5 bits each are used for the red, green and blue components and the most significant bit is not used.
     /// Same as [Format16bppRgb555] on little-endian architectures.
     Format16bppRgb555LE,
 
-    /// Specifies that the format is 16 bits per pixel, in big endian byte order, where 5 bits are used for the red component, 6 bits are used for the green component and 5 bits are used for the blue component.
+    /// Specifies that the format is 16 bits per pixel (high color), in big endian byte order, where 5 bits are used for the red component, 6 bits are used for the green component and 5 bits are used for the blue component.
     /// Same as [Format16bppRgb565] on big-endian architectures.
     Format16bppRgb565BE,
 
-    /// Specifies that the format is 16 bits per pixel, in little endian byte order, where 5 bits are used for the red component, 6 bits are used for the green component and 5 bits are used for the blue component.
+    /// Specifies that the format is 16 bits per pixel (high color), in little endian byte order, where 5 bits are used for the red component, 6 bits are used for the green component and 5 bits are used for the blue component.
     /// Same as [Format16bppRgb565] on little-endian architectures.
     Format16bppRgb565LE,
 
@@ -120,14 +120,14 @@ public enum PixelFormat
     /// Same as [java.awt.image.BufferedImage.TYPE_4BYTE_ABGR](https://docs.oracle.com/javase/8/docs/api/java/awt/image/BufferedImage.html#TYPE_4BYTE_ABGR) in Java AWT.
     Format32bppRgbaLE,
 
-    /// Specifies that the format is 16 bits per pixel, where 5 bits each are used for the red, green and blue components and the most significant bit is not used.
+    /// Specifies that the format is 16 bits per pixel (high color), where 5 bits each are used for the red, green and blue components and the most significant bit is not used.
     /// Same as [Format16bppRgb555BE] on big-endian architectures and as [Format16bppRgb555LE] on little-endian architectures.
     /// Same as [java.awt.image.BufferedImage.TYPE_USHORT_555_RGB](https://docs.oracle.com/javase/8/docs/api/java/awt/image/BufferedImage.html#TYPE_USHORT_555_RGB) in Java AWT.
     /// Same as [`System.Imaging.Imaging.PixelFormat.Format16bppRgb555`](https://learn.microsoft.com/dotnet/api/system.imaging.imaging.pixelformat) in .NET.
     Format16bppRgb555 = (endian == Endian.bigEndian ? Format16bppRgb555BE
             : Format16bppRgb555LE),
 
-    /// Specifies that the format is 16 bits per pixel, where 5 bits are used for the red component, 6 bits are used for the green component and 5 bits are used for the blue component.
+    /// Specifies that the format is 16 bits per pixel (high color), where 5 bits are used for the red component, 6 bits are used for the green component and 5 bits are used for the blue component.
     /// Same as [Format16bppRgb565BE] on big-endian architectures and as [Format16bppRgb565LE] on little-endian architectures.
     /// Same as [java.awt.image.BufferedImage.TYPE_USHORT_565_RGB](https://docs.oracle.com/javase/8/docs/api/java/awt/image/BufferedImage.html#TYPE_USHORT_565_RGB) in Java AWT.
     /// Same as [`System.Imaging.Imaging.PixelFormat.Format16bppRgb565`](https://learn.microsoft.com/dotnet/api/system.imaging.imaging.pixelformat) in .NET.
@@ -771,58 +771,6 @@ public interface Image(T)
         assert(0 <= x && x < this.width);
         assert(0 <= y && y < this.height);
     }
-}
-
-@nogc private ubyte to5bits(ubyte val) nothrow
-{
-    ubyte val1 = val >> 3;
-    if (val < 64)
-    {
-        val1 |= 0b00001 & val >> 2;
-    }
-    else if (64 < val && val < 96)
-    {
-        val1 |= 0b00001 & (val >> 2 & val >> 1);
-    }
-    else if (96 < val && val < 112)
-    {
-        val1 |= 0b00001 & (val >> 2 & val >> 1 & val);
-    }
-    else if (144 < val && val < 160)
-    {
-        val1 &= 0b11110 | (val >> 2 | val >> 1 | val);
-    }
-    else if (160 < val && val < 192)
-    {
-        val1 &= 0b11110 | (val >> 2 | val >> 1);
-    }
-    else if (192 < val)
-    {
-        val1 &= 0b11110 | val >> 2;
-    }
-    return val1;
-}
-
-@nogc private ubyte to6bits(ubyte val) nothrow
-{
-    ubyte val1 = val >> 2;
-    if (val < 64)
-    {
-        val1 |= 0b00001 & val >> 1;
-    }
-    else if (64 < val && val < 96)
-    {
-        val1 |= 0b00001 & (val >> 1 & val);
-    }
-    else if (144 < val && val < 192)
-    {
-        val1 &= 0b11110 | (val >> 1 | val);
-    }
-    else if (192 < val)
-    {
-        val1 &= 0b11110 | val >> 1;
-    }
-    return val1;
 }
 
 @nogc private void copyBitsBuffer(ubyte* dest, size_t destOffset,
@@ -1554,16 +1502,16 @@ unittest
             (cast(ubyte*) ptr)[x] = color.luma;
             break;
         case PixelFormat.Format16bppRgb555:
-            ubyte r = to5bits(color.r);
-            ubyte g = to5bits(color.g);
-            ubyte b = to5bits(color.b);
+            ubyte r = color.r >> 3;
+            ubyte g = color.g >> 3;
+            ubyte b = color.b >> 3;
             ushort rgb = cast(ushort)(r << 10 | g << 5 | b);
             (cast(ushort*) ptr)[x] = rgb;
             break;
         case PixelFormat.Format16bppRgb565:
-            ubyte r = to5bits(color.r);
-            ubyte g = to6bits(color.g);
-            ubyte b = to5bits(color.b);
+            ubyte r = color.r >> 3;
+            ubyte g = color.g >> 2;
+            ubyte b = color.b >> 3;
             ushort rgb = cast(ushort)(r << 11 | g << 5 | b);
             (cast(ushort*) ptr)[x] = rgb;
             break;
@@ -1585,16 +1533,16 @@ unittest
             (cast(uint*) ptr)[x] = color.rgba;
             break;
         case flipEndian(PixelFormat.Format16bppRgb555):
-            ubyte r = to5bits(color.r);
-            ubyte g = to5bits(color.g);
-            ubyte b = to5bits(color.b);
+            ubyte r = color.r >> 3;
+            ubyte g = color.g >> 3;
+            ubyte b = color.b >> 3;
             ushort val = cast(ushort)(g << 13 | b << 8 | r << 2 | g >> 3);
             (cast(ushort*) ptr)[x] = val;
             break;
         case flipEndian(PixelFormat.Format16bppRgb565):
-            ubyte r = to5bits(color.r);
-            ubyte g = to6bits(color.g);
-            ubyte b = to5bits(color.b);
+            ubyte r = color.r >> 3;
+            ubyte g = color.g >> 2;
+            ubyte b = color.b >> 3;
             ushort val = cast(ushort)(g << 13 | b << 8 | r << 3 | g >> 3);
             (cast(ushort*) ptr)[x] = val;
             break;
@@ -3626,16 +3574,16 @@ unittest
                 (cast(ubyte*) ptr)[this.skipX .. this.skipX + this.width] = color.luma;
                 break;
             case PixelFormat.Format16bppRgb555:
-                ubyte r = to5bits(color.r);
-                ubyte g = to5bits(color.g);
-                ubyte b = to5bits(color.b);
+                ubyte r = color.r >> 3;
+                ubyte g = color.g >> 3;
+                ubyte b = color.b >> 3;
                 ushort rgb = cast(ushort)(r << 10 | g << 5 | b);
                 (cast(ushort*) ptr)[this.skipX .. this.skipX + this.width] = rgb;
                 break;
             case PixelFormat.Format16bppRgb565:
-                ubyte r = to5bits(color.r);
-                ubyte g = to6bits(color.g);
-                ubyte b = to5bits(color.b);
+                ubyte r = color.r >> 3;
+                ubyte g = color.g >> 2;
+                ubyte b = color.b >> 3;
                 ushort rgb = cast(ushort)(r << 11 | g << 5 | b);
                 (cast(ushort*) ptr)[this.skipX .. this.skipX + this.width] = rgb;
                 break;
@@ -3661,16 +3609,16 @@ unittest
                 (cast(uint*) ptr)[this.skipX .. this.skipX + this.width] = color.rgba;
                 break;
             case flipEndian(PixelFormat.Format16bppRgb555):
-                ubyte r = to5bits(color.r);
-                ubyte g = to5bits(color.g);
-                ubyte b = to5bits(color.b);
+                ubyte r = color.r >> 3;
+                ubyte g = color.g >> 3;
+                ubyte b = color.b >> 3;
                 ushort val = cast(ushort)(g << 13 | b << 8 | r << 2 | g >> 3);
                 (cast(ushort*) ptr)[this.skipX .. this.skipX + this.width] = val;
                 break;
             case flipEndian(PixelFormat.Format16bppRgb565):
-                ubyte r = to5bits(color.r);
-                ubyte g = to6bits(color.g);
-                ubyte b = to5bits(color.b);
+                ubyte r = color.r >> 3;
+                ubyte g = color.g >> 2;
+                ubyte b = color.b >> 3;
                 ushort val = cast(ushort)(g << 13 | b << 8 | r << 3 | g >> 3);
                 (cast(ushort*) ptr)[this.skipX .. this.skipX + this.width] = val;
                 break;
