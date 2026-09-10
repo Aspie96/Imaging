@@ -497,7 +497,7 @@ out (result; result == 1 || result == 2 || result == 4)
      */
     @nogc public pure ubyte luma() const nothrow
     {
-        return ((this.r * 299 + this.g * 587 + this.b * 114) + 500) / 1000;
+        return (this.r * 2_126 + this.g * 7_152 + this.b * 722 + 5_000) / 10_000;
     }
 
     /// Getting the luma for a color
