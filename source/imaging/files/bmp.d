@@ -27,21 +27,11 @@ import std.typecons : Nullable, nullable;
 
 version (Windows)
 {
-    import core.sys.windows.wingdi : BI_BITFIELDS, BI_RGB, BITMAPCOREHEADER, BITMAPFILEHEADER, BITMAPINFOHEADER,
+    import core.sys.windows.wingdi : BITMAPCOREHEADER, BITMAPFILEHEADER, BITMAPINFOHEADER,
         BITMAPV4HEADER, BITMAPV5HEADER, CIEXYZ, CIEXYZTRIPLE, FXPT2DOT30, RGBQUAD, RGBTRIPLE;
 }
 else
 {
-    private enum : uint
-    {
-        BI_RGB = 0,
-        BI_RLE8,
-        BI_RLE4,
-        BI_BITFIELDS,
-        BI_JPEG,
-        BI_PNG
-    }
-
     private struct BITMAPCOREHEADER
     {
         uint bcSize;
@@ -1242,7 +1232,27 @@ public final class BmpLoader : ImageLoader
                     }
                     else if (pair[1] == 2)
                     {
-                        return null;
+                        ubyte[2] deltas;
+                        if (this._fp.rawRead(deltas).length != 2)
+                        {
+                            return null;
+                        }
+                        toRead -= 2;
+                        if (deltas == [0, 0])
+                        {
+                            return null;
+                        }
+                        if (deltas[0] > this._info.width - (i % this._info.width))
+                        {
+                            return null;
+                        }
+                        if (deltas[1] > this._info.height - i / this._info.width)
+                        {
+                            return null;
+                        }
+                        size_t shift = deltas[0] + this._info.width * deltas[1];
+                        (cast(ubyte[]) data)[i .. i + shift] = 0;
+                        i += shift;
                     }
                     else
                     {
@@ -1344,7 +1354,31 @@ public final class BmpLoader : ImageLoader
                     }
                     else if (pair[1] == 2)
                     {
-                        return null;
+                        ubyte[2] deltas;
+                        if (this._fp.rawRead(deltas).length != 2)
+                        {
+                            return null;
+                        }
+                        toRead -= 2;
+                        if (deltas == [0, 0])
+                        {
+                            return null;
+                        }
+                        if (deltas[0] > this._info.width - x)
+                        {
+                            return null;
+                        }
+                        if (deltas[1] > this._info.height - y)
+                        {
+                            return null;
+                        }
+                        x += deltas[0];
+                        if (deltas[1] != 0)
+                        {
+                            data[y * dStride .. (y + 1) * dStride] = row;
+                            row[] = 0;
+                            y -= deltas[1];
+                        }
                     }
                     else
                     {

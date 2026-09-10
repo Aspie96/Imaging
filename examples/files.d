@@ -62,11 +62,12 @@ void main()
     stdout.flush();
     sw.start();
     auto bmpQuestionableTests = map!(s => "images/bmpsuite/q/" ~ s)([
-        "pal1p1.bmp", "pal2.bmp", "pal2color.bmp", "pal8offs.bmp",
-        "pal8os2sp.bmp", "pal8os2-sz.bmp", "pal8os2v2-40sz.bmp",
-        "pal8oversizepal.bmp", "rgb16-231.bmp", "rgb16-3103.bmp",
-        "rgb16faketrns.bmp", "rgb24largepal.bmp", "rgb24png.bmp", "rgb32-7187.bmp",
-        "rgb32-111110.bmp", "rgb32fakealpha.bmp", "rgb32-xbgr.bmp"
+        "pal1p1.bmp", "pal2.bmp", "pal2color.bmp", "pal4rletrns.bmp",
+        "pal8offs.bmp", "pal8os2sp.bmp", "pal8os2-sz.bmp", "pal8os2v2-40sz.bmp",
+        "pal8oversizepal.bmp", "pal8rletrns.bmp", "rgb16-231.bmp",
+        "rgb16-3103.bmp", "rgb16faketrns.bmp", "rgb24largepal.bmp", "rgb24png.bmp",
+        "rgb32-7187.bmp", "rgb32-111110.bmp", "rgb32fakealpha.bmp",
+        "rgb32-xbgr.bmp"
     ]);
     foreach (string fname; bmpQuestionableTests)
     {
